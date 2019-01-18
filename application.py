@@ -40,10 +40,19 @@ def index():
 def homepage():
     return render_template("homepage.html")
 
-@app.route("/homepage1")
+@app.route("/homepage")
 def homepage1():
     return render_template("homepage1.html")
 
+@app.route("/popular")
+def popular():
+    import requests
+    # Haal Populaire films op
+    response = requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl")
+    response = (response.content).decode('UTF-8')
+    for key, value in response.items():
+        popresults = dict(key, value)
+    return render_template("popular.html", populair1=popresults)
 @app.route("/wachtwoord")
 def wachtwoord():
     return render_template("wachtwoord.html")
