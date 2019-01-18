@@ -163,7 +163,30 @@ def logout():
     # redirect user to login form
     return redirect(url_for("login"))
 
-@app.route("/vriend")
+@app.route("/vriend", methods=["GET", "POST"])
 @login_required
 def vriend():
-    return render_template("vriend.html")
+    if request.method == "GET":
+        return render_template("vriend.html")
+    else:
+        # juiste naam
+        naam = lookup(request.form.get("gebruikersnaam"))
+        if not naam:
+            return apology("We kunnen deze naam niet vinden")
+
+        # selecteer de persoon
+        vriendo = db.execute("SELECT gebruikersnaam FROM gebruikers \
+                           WHERE id = :id", \
+                           id=session["user_id"])
+
+        # maak nieuwe vriend als de gebruiker deze nog niet heeft
+        if not vriendo:
+            db.execute("INSERT INTO vrienden (id, vriendennaam) \
+                        VALUES(:id, :vriendennaam)", \
+                        id=session["user_id"], vriendennaam=["vriendennaam"])
+
+        else:
+            return apology("Deze gebruiker is al je vriend")
+
+        # return to index
+        return redirect(url_for("index"))
