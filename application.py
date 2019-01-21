@@ -33,7 +33,10 @@ db = SQL("sqlite:///nlfilms.db")
 @app.route("/index")
 @login_required
 def index():
-    return render_template("index.html")
+    from urllib.request import urlopen
+    popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
+    popular_results = popular["results"]
+    return render_template("index.html", results=popular_results)
 
 @app.route("/")
 def homepage():

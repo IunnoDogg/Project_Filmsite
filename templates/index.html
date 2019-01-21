@@ -77,8 +77,16 @@
         </nav>
         {% endif %}
 
-        <main>
-          {% block main %}{% endblock %}
-        </main>
-  </body>
+        <center><bold><h3>Populairste Nederlandse films</h3></bold></center>
+        <center><hr>
+        {% block main %}
+
+        <!-- Tabellen in JinJa; https://stackoverflow.com/questions/9198334/how-to-build-up-a-html-table-with-a-simple-for-loop-in-jinja2 -->
+        {%- for i in results[:12] -%}
+         <IMG src="http://image.tmdb.org/t/p/w185{{i.poster_path}}" class="homepage_poster">
+        {%- endfor -%}
+
+        {% endblock %}
+        </center>
+    </body>
 </html>
