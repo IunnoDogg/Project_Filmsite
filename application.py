@@ -186,12 +186,13 @@ def vriendenlijst():
 '''
 @app.route("/zoeken", methods=["GET", "POST"])
 def zoekresultaat():
+
     if request.method == "POST":
         from urllib.request import urlopen
-        zoekresultaten = json.loads(str((requests.get("https://api.themoviedb.org/3/search/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&query=" + zoekterm + "&include_adult=false&page=1").content).decode('UTF-8')))
+        zoekresultaten = json.loads(str((requests.get("https://api.themoviedb.org/3/search/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&query=" + request.form.get("zoekterm") + "&include_adult=false&page=1").content).decode('UTF-8')))
         zoekresultaten = zoekresultaten["results"]
 
-        return render_template("zoekresultaten.html", pagina1=zoekresultaten)
+        return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten)
         ##als het nederlands is
         #"original_language":"nl"
 
