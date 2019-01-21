@@ -3,8 +3,7 @@ from flask import Flask, flash, redirect, render_template, request, session, url
 from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import mkdtemp
-import datetime
-
+import datetime, requests, json, xml.etree.ElementTree, urllib
 from helpers import *
 
 # configure application
@@ -34,15 +33,21 @@ db = SQL("sqlite:///nlfilms.db")
 @app.route("/index")
 @login_required
 def index():
-    return render_template("index.html")
+    from urllib.request import urlopen
+    popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
+    popular_results = popular["results"]
+    return render_template("index.html", results=popular_results)
 
 @app.route("/")
 def homepage():
-    return render_template("homepage.html")
+    # Haal populaire films op
+    from urllib.request import urlopen
+    popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
+    popular_results = popular["results"]
 
-@app.route("/homepage1")
-def homepage1():
-    return render_template("homepage1.html")
+    # Vanavond op televisie
+
+    return render_template("homepage.html", results=popular_results)
 
 @app.route("/wachtwoord")
 def wachtwoord():
@@ -163,30 +168,39 @@ def logout():
     # redirect user to login form
     return redirect(url_for("login"))
 
-@app.route("/vriend", methods=["GET", "POST"])
+@app.route("/vriend")
 @login_required
 def vriend():
-    if request.method == "GET":
-        return render_template("vriend.html")
-    else:
-        # juiste naam
-        naam = lookup(request.form.get("gebruikersnaam"))
-        if not naam:
-            return apology("We kunnen deze naam niet vinden")
+    return render_template("vriendtoevoegen.html")
 
-        # selecteer de persoon
-        vriendo = db.execute("SELECT gebruikersnaam FROM gebruikers \
-                           WHERE id = :id", \
-                           id=session["user_id"])
+@app.route("/vriendenlijst")
+@login_required
+def vriendenlijst():
+    return render_template("vriendenlijst.html")
 
-        # maak nieuwe vriend als de gebruiker deze nog niet heeft
-        if not vriendo:
-            db.execute("INSERT INTO vrienden (id, vriendennaam) \
-                        VALUES(:id, :vriendennaam)", \
-                        id=session["user_id"], vriendennaam=["vriendennaam"])
+# ZOEKEN
+'''
+    from urllib.request import urlopen
+    popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
+    popular_results = popular["results"]
+'''
+@app.route("/zoeken", methods=["GET", "POST"])
+def zoekresultaat():
+    if request.method == "POST":
+        from urllib.request import urlopen
+        zoekresultaten = json.loads(str((requests.get("https://api.themoviedb.org/3/search/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&query=" + zoekterm + "&include_adult=false&page=1").content).decode('UTF-8')))
+        zoekresultaten = zoekresultaten["results"]
 
-        else:
-            return apology("Deze gebruiker is al je vriend")
+        return render_template("zoekresultaten.html", pagina1=zoekresultaten)
+        ##als het nederlands is
+        #"original_language":"nl"
 
-        # return to index
-        return redirect(url_for("index"))
+
+ #       if not stockinfo:
+ #           return apology("Stock is not valid")
+ #       return render_template("stockprice.html", aandeel=stockinfo)
+ #   else:
+ #       return render_template("quote.html")
+
+    # zoekresultaat TMDb id naar IMDb id (als OMDb input)
+    "https://api.themoviedb.org/3/movie/569050?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl"

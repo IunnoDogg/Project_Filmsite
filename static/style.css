@@ -32,7 +32,7 @@ section .section-title {
 
 #team .card {
     border: none;
-    background: lightgrey;
+    background: #5c0120;
 }
 
 .image-flip:hover .backside,
@@ -126,4 +126,11 @@ section .section-title {
     width: 120px;
     height: 120px;
     border-radius: 50%;
+}
+
+.homepage_poster {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
 }

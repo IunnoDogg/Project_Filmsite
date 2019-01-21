@@ -41,25 +41,21 @@
                     </li>
                 </ul>
 
-                <form class="form-inline my-2 my-lg-0" action="/zoeken" method="post">
-                    <div class="form-group">
-                    <input autocomplete="off" autofocus class="form-control" class="form-control mr-sm-2" type="text" name="zoekterm" placeholder="Zoekterm" aria-label="Search">
-                    </div>
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Zoek</button>
-                </form>
+{% extends "layout.html" %}
+
+{% block title %}
+    Quote
+{% endblock %}
+
+{% block main %}
+    <form action="{{ url_for('quote') }}" method="post">
+        <fieldset>
+            <div class="form-group">
+                <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text"/>
             </div>
-        </nav>
-
-        <center><bold><h3>Populairste Nederlandse films</h3></bold></center>
-        <center><hr>
-        {% block main %}
-
-        <!-- Tabellen in JinJa; https://stackoverflow.com/questions/9198334/how-to-build-up-a-html-table-with-a-simple-for-loop-in-jinja2 -->
-        {%- for i in results[:12] -%}
-         <IMG src="http://image.tmdb.org/t/p/w185{{i.poster_path}}" class="homepage_poster">
-        {%- endfor -%}
-
-        {% endblock %}
-        </center>
-    </body>
-</html>
+            <div class="form-group">
+                <button class="btn btn-default" type="submit">Quote</button>
+            </div>
+        </fieldset>
+    </form>
+{% endblock %}
