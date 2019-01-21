@@ -3,7 +3,8 @@ from flask import Flask, flash, redirect, render_template, request, session, url
 from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import mkdtemp
-import datetime, requests, json, xml.etree.ElementTree, urllib
+import datetime
+
 from helpers import *
 
 # configure application
@@ -33,21 +34,15 @@ db = SQL("sqlite:///nlfilms.db")
 @app.route("/index")
 @login_required
 def index():
-    from urllib.request import urlopen
-    popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
-    popular_results = popular["results"]
-    return render_template("index.html", results=popular_results)
+    return render_template("index.html")
 
 @app.route("/")
 def homepage():
-    # Haal populaire films op
-    from urllib.request import urlopen
-    popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
-    popular_results = popular["results"]
+    return render_template("homepage.html")
 
-    # Vanavond op televisie
-
-    return render_template("homepage.html", results=popular_results)
+@app.route("/homepage1")
+def homepage1():
+    return render_template("homepage1.html")
 
 @app.route("/wachtwoord")
 def wachtwoord():
@@ -168,39 +163,73 @@ def logout():
     # redirect user to login form
     return redirect(url_for("login"))
 
-@app.route("/vriend")
+@app.route("/vriend", methods=["GET", "POST"])
 @login_required
 def vriend():
-    return render_template("vriendtoevoegen.html")
+    if request.method == "GET":
+        return render_template("vriend.html")
+    else:
+        # juiste naam
+        naam = lookup(request.form.get("gebruikersnaam"))
+        if not naam:
+            return apology("We kunnen deze naam niet vinden")
 
-@app.route("/vriendenlijst")
-@login_required
-def vriendenlijst():
-    return render_template("vriendenlijst.html")
+        # selecteer de persoon
+        vriendo = db.execute("SELECT gebruikersnaam FROM gebruikers \
+                           WHERE id = :id", \
+                           id=session["user_id"])
 
-# ZOEKEN
-'''
-    from urllib.request import urlopen
-    popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
-    popular_results = popular["results"]
-'''
-@app.route("/zoeken", methods=["GET", "POST"])
-def zoekresultaat():
-    if request.method == "POST":
-        from urllib.request import urlopen
-        zoekresultaten = json.loads(str((requests.get("https://api.themoviedb.org/3/search/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&query=" + zoekterm + "&include_adult=false&page=1").content).decode('UTF-8')))
-        zoekresultaten = zoekresultaten["results"]
+        # maak nieuwe vriend als de gebruiker deze nog niet heeft
+        if not vriendo:
+            db.execute("INSERT INTO vrienden (id, vriendennaam) \
+                        VALUES(:id, :vriendennaam)", \
+                        id=session["user_id"], vriendennaam=["vriendennaam"])
 
-        return render_template("zoekresultaten.html", pagina1=zoekresultaten)
-        ##als het nederlands is
-        #"original_language":"nl"
+        else:
+            return apology("Deze gebruiker is al je vriend")
 
+        # return to index
+        return redirect(url_for("index"))
 
- #       if not stockinfo:
- #           return apology("Stock is not valid")
- #       return render_template("stockprice.html", aandeel=stockinfo)
- #   else:
- #       return render_template("quote.html")
+def profiel():
+    """Verander accountsgegevens"""
 
-    # zoekresultaat TMDb id naar IMDb id (als OMDb input)
-    "https://api.themoviedb.org/3/movie/569050?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl"
+    if request.method == 'POST':
+
+        # bevestig oud wachtwoord
+        if not request.form.get('wachtwoord'):
+            return apology("Vul je huidige wachtwoord in")
+
+        # pak id uit database
+        account = db.execute("SELECT * FROM gebruikers WHERE id = :id", user_id=session['id'])
+
+        # bevestig of het wachtwoord klopt
+        if len(account) != 1 or not pwd_context.verify(request.form.get('wachtwoord'), account[0]['hash']):
+            return apology("Het wachtwoord klopt niet!")
+
+        # check of een nieuw wachtwoord is ingevuld
+        if not request.form.get("nieuw_wachtwoord"):
+            return apology("Vul een nieuw wachtwoord in")
+
+        # check of het nieuwe wachtwoord is herhaald
+        if not request.form.get("wachtwoord_herhaling"):
+            return apology("Herhaal je nieuwe wachtwoord")
+
+        # controleer of beide wachtwoorden overeenkomen
+        if request.form.get("nieuw_wachtwoord") != request.form.get("wachtwoord_herhaling"):
+            return apology("De wachtwoorden komen niet overeen")
+
+        # maak een hash van het wachtwoord
+        niet_hash = request.form.get("nieuw_wachtwoord")
+        hash = pwd_context.encrypt(niet_hash)
+
+        # update de gebruiker
+        result = db.execute("UPDATE gebruikers SET hash=:wachtwoord", hash=hash)
+
+        if not result:
+            return apology("Iets ging fout...")
+
+        return redirect(url_for("index"))
+
+    else:
+        return render_template("profiel.html")
