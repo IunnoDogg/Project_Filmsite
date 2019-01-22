@@ -183,7 +183,7 @@ def vriend():
         if not vriendo:
             db.execute("INSERT INTO vrienden (id, vriendennaam) \
                         VALUES(:id, :vriendennaam)", \
-                        id=session["user_id"], vriendennaam=["vriendennaam"])
+                        id=session["user_id"], vriendennaam=["naam"])
 
         else:
             return apology("Deze gebruiker is al je vriend")
@@ -191,8 +191,17 @@ def vriend():
         # return to index
         return redirect(url_for("index"))
 
+@app.route("/profiel")
+@login_required
 def profiel():
-    """Verander accountsgegevens"""
+    "Pas je profiel aan"
+    return render_template("profiel.html")
+
+
+@app.route("/wachtwoordveranderen")
+@login_required
+def wachtwoordveranderen():
+    """Verander wachtwoord"""
 
     if request.method == 'POST':
 
@@ -224,12 +233,41 @@ def profiel():
         hash = pwd_context.encrypt(niet_hash)
 
         # update de gebruiker
-        result = db.execute("UPDATE gebruikers SET hash=:wachtwoord", hash=hash)
+        resultaat = db.execute("UPDATE gebruikers SET hash=:wachtwoord", hash=hash)
 
-        if not result:
+        if not resultaat:
             return apology("Iets ging fout...")
 
         return redirect(url_for("index"))
 
     else:
-        return render_template("profiel.html")
+        return render_template("wachtwoordveranderen.html")
+
+
+@app.route("/gebruikersnaamveranderen")
+@login_required
+def gebruikersnaamveranderen():
+    """Verander gebruikersnaam"""
+
+    if request.method == 'POST':
+
+        # pak id uit database
+        account = db.execute("SELECT * FROM gebruikers WHERE id = :id", user_id=session['id'])
+
+        # check of een nieuwe gebruikersnaam is ingevuld
+        if not request.form.get("new_username"):
+            return apology("Vul een nieuwe gebruikersnaam in")
+
+        # de nieuwe naam
+        newname = request.form.get("new_username")
+
+        # update de gebruiker
+        resultaat = db.execute("UPDATE gebruikers SET newname=:gebruikersnaam")
+
+        if not resultaat:
+            return apology("Iets ging fout...")
+
+        return redirect(url_for("index"))
+
+    else:
+        return render_template("gebruikersnaamveranderen.html")
