@@ -2,8 +2,10 @@ from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
+from passlib.apps import custom_app_context as CryptContext
 from tempfile import mkdtemp
-import datetime
+import datetime, requests, json, xml.etree.ElementTree, urllib
+from helpers import *
 
 from helpers import *
 
@@ -19,9 +21,6 @@ if app.config["DEBUG"]:
         response.headers["Pragma"] = "no-cache"
         return response
 
-# custom filter
-app.jinja_env.filters["usd"] = usd
-
 # configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
@@ -34,15 +33,21 @@ db = SQL("sqlite:///nlfilms.db")
 @app.route("/index")
 @login_required
 def index():
-    return render_template("index.html")
+    from urllib.request import urlopen
+    popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
+    popular_results = popular["results"]
+    return render_template("index.html", results=popular_results)
 
 @app.route("/")
 def homepage():
-    return render_template("homepage.html")
+    # Haal populaire films op
+    from urllib.request import urlopen
+    popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
+    popular_results = popular["results"]
 
-@app.route("/homepage1")
-def homepage1():
-    return render_template("homepage1.html")
+    # Vanavond op televisie
+
+    return render_template("homepage.html", results=popular_results)
 
 @app.route("/wachtwoord")
 def wachtwoord():
@@ -176,7 +181,7 @@ def vriend():
 
         # selecteer de persoon
         vriendo = db.execute("SELECT gebruikersnaam FROM gebruikers \
-                           WHERE id = :id", \
+                           WHERE id=:id", \
                            id=session["user_id"])
 
         # maak nieuwe vriend als de gebruiker deze nog niet heeft
@@ -191,6 +196,11 @@ def vriend():
         # return to index
         return redirect(url_for("index"))
 
+@app.route("/vriendenlijst")
+@login_required
+def vriendenlijst():
+    return render_template("vriendenlijst.html")
+
 @app.route("/profiel")
 @login_required
 def profiel():
@@ -198,7 +208,7 @@ def profiel():
     return render_template("profiel.html")
 
 
-@app.route("/wachtwoordveranderen")
+@app.route("/wachtwoordveranderen", methods=["GET", "POST"])
 @login_required
 def wachtwoordveranderen():
     """Verander wachtwoord"""
@@ -210,10 +220,10 @@ def wachtwoordveranderen():
             return apology("Vul je huidige wachtwoord in")
 
         # pak id uit database
-        account = db.execute("SELECT * FROM gebruikers WHERE id = :id", user_id=session['id'])
+        account = db.execute("SELECT * FROM gebruikers WHERE id = :id", id=session['user_id'])
 
         # bevestig of het wachtwoord klopt
-        if len(account) != 1 or not pwd_context.verify(request.form.get('wachtwoord'), account[0]['hash']):
+        if len(account) != 1 or not pwd_context.verify(request.form.get('wachtwoord'), account[0]['wachtwoord']):
             return apology("Het wachtwoord klopt niet!")
 
         # check of een nieuw wachtwoord is ingevuld
@@ -230,10 +240,10 @@ def wachtwoordveranderen():
 
         # maak een hash van het wachtwoord
         niet_hash = request.form.get("nieuw_wachtwoord")
-        hash = pwd_context.encrypt(niet_hash)
+        new_hash = CryptContext.hash(niet_hash)
 
         # update de gebruiker
-        resultaat = db.execute("UPDATE gebruikers SET hash=:wachtwoord", hash=hash)
+        resultaat = db.execute("UPDATE gebruikers SET wachtwoord=:wachtwoord WHERE id=:id", id=session["user_id"], wachtwoord=new_hash)
 
         if not resultaat:
             return apology("Iets ging fout...")
@@ -244,7 +254,7 @@ def wachtwoordveranderen():
         return render_template("wachtwoordveranderen.html")
 
 
-@app.route("/gebruikersnaamveranderen")
+@app.route("/gebruikersnaamveranderen", methods=["GET", "POST"])
 @login_required
 def gebruikersnaamveranderen():
     """Verander gebruikersnaam"""
@@ -252,7 +262,7 @@ def gebruikersnaamveranderen():
     if request.method == 'POST':
 
         # pak id uit database
-        account = db.execute("SELECT * FROM gebruikers WHERE id = :id", user_id=session['id'])
+        account = db.execute("SELECT * FROM gebruikers WHERE id = :id", id=session['user_id'])
 
         # check of een nieuwe gebruikersnaam is ingevuld
         if not request.form.get("new_username"):
@@ -262,7 +272,7 @@ def gebruikersnaamveranderen():
         newname = request.form.get("new_username")
 
         # update de gebruiker
-        resultaat = db.execute("UPDATE gebruikers SET newname=:gebruikersnaam")
+        resultaat = db.execute("UPDATE gebruikers SET gebruikersnaam=:gebruikersnaam WHERE id=:id", id=session["user_id"], gebruikersnaam=newname)
 
         if not resultaat:
             return apology("Iets ging fout...")
@@ -271,3 +281,25 @@ def gebruikersnaamveranderen():
 
     else:
         return render_template("gebruikersnaamveranderen.html")
+
+# ZOEKEN
+'''
+    from urllib.request import urlopen
+    popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
+    popular_results = popular["results"]
+'''
+@app.route("/zoeken", methods=["GET", "POST"])
+def zoekresultaat():
+
+    if request.method == "POST":
+        from urllib.request import urlopen
+        zoekresultaten = json.loads(str((requests.get("https://api.themoviedb.org/3/search/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&query=" + request.form.get("zoekterm") + "&include_adult=false&page=1").content).decode('UTF-8')))
+        zoekresultaten = zoekresultaten["results"]
+
+        return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten)
+        ##als het nederlands is
+        #"original_language":"nl"
+
+
+    # zoekresultaat TMDb id naar IMDb id (als OMDb input)
+    "https://api.themoviedb.org/3/movie/569050?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl"
