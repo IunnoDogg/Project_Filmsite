@@ -1,5 +1,5 @@
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify
 from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import mkdtemp
@@ -168,15 +168,62 @@ def logout():
     # redirect user to login form
     return redirect(url_for("login"))
 
-@app.route("/vriend")
+@app.route("/vriend", methods=["GET", "POST"])
 @login_required
 def vriend():
+
+    if request.method == "POST":
+
+        toetevoegenvriend = request.form.get("vriend")
+
+        vriend = db.execute("SELECT * FROM gebruikers WHERE gebruikersnaam = :gebruikersnaam",
+                          gebruikersnaam=toetevoegenvriend)
+
+        if not vriend:
+            return apology("Deze gebruikersnaam bestaat niet.")
+
+        lijst = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+        gebruiker = lijst[0]["gebruikersnaam"]
+
+        altoegevoegd = db.execute("SELECT naar FROM verzoeken WHERE naar =:naar AND van=:van", naar=toetevoegenvriend, van=gebruiker)
+        tekst = "Je hebt " + toetevoegenvriend + " al toegevoegd"
+
+        if altoegevoegd:
+            return apology(tekst)
+        # if altoegevoegd:
+        #     return jsonify({"error" : tekst})
+
+        else:
+
+            db.execute("INSERT INTO verzoeken (van, naar) VALUES (:van, :naar)", van=gebruiker, naar=toetevoegenvriend)
+
+            return render_template("toegevoegd.html", toetevoegenvriend=toetevoegenvriend)
+            # return jsonify({"vriend" : toetevoegenvriend})
+
     return render_template("vriendtoevoegen.html")
+
+@app.route("/toegevoegd", methods=["GET", "POST"])
+@login_required
+def toegevoegd():
+    return render_template("toegevoegd.html")
 
 @app.route("/vriendenlijst")
 @login_required
 def vriendenlijst():
     return render_template("vriendenlijst.html")
+
+@app.route("/verzoeken", methods=["GET", "POST"])
+@login_required
+def verzoeken():
+
+    gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+    gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+
+    verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar", naar=gebruikerzelf)
+
+    print(verzoeken)
+
+    return render_template("verzoeken.html", verzoeken=verzoeken)
 
 # ZOEKEN
 '''

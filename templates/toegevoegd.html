@@ -82,14 +82,16 @@
           </div>
         </nav>
 
-        <form action="{{ url_for('vriendenlijst') }}" method="post">
-          <div class="form-group">
-            <div class="col-md-12 control">
-                <div style="border-top: 1px solid#888; padding-top:15px; font-size:85%" >
-                    <a href="{{ url_for('verzoeken') }}">Vriendschapsverzoeken</a>
-                </div>
-            </div>
-        </div>
+        <form action="{{ url_for('toegevoegd') }}" method="post">
+          <div class="container" style="margin-top: 8%;">
+              <div class="col-md-6 col-md-offset-3">
+                  <div class="row">
+                      <div id="logo" class="text-center">
+                          <h2><p>{{ toetevoegenvriend }} is met succes toegevoegd!</p></h2>
+                      </div>
+                  </div>
+              </div>
+          </div>
         {% endif %}
 
         <main>
