@@ -133,9 +133,6 @@ def login():
         rows1 = db.execute("SELECT * FROM gebruikers WHERE email = :email",
                           email=request.form.get("gebruiker-inloggen"))
 
-        print(rows)
-        print(rows1)
-
         if len(rows) == 0:
             if len(rows1) != 1 or not pwd_context.verify(request.form.get("wachtwoord-inloggen"), rows1[0]["wachtwoord"]):
                 return apology("Ongeldige email en/of wachtwoord")
@@ -185,20 +182,42 @@ def vriend():
         lijst = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
         gebruiker = lijst[0]["gebruikersnaam"]
 
-        altoegevoegd = db.execute("SELECT naar FROM verzoeken WHERE naar =:naar AND van=:van", naar=toetevoegenvriend, van=gebruiker)
+        altoegevoegd = db.execute("SELECT naar FROM verzoeken WHERE naar =:naar AND van=:van AND geaccepteerd IS NULL",
+        naar=toetevoegenvriend, van=gebruiker)
         tekst = "Je hebt " + toetevoegenvriend + " al toegevoegd"
 
         if altoegevoegd:
             return apology(tekst)
-        # if altoegevoegd:
-        #     return jsonify({"error" : tekst})
+
+        if toetevoegenvriend == gebruiker:
+            return apology("Je kan jezelf niet toevoegen")
+
+        alvrienden = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
+                                van=toetevoegenvriend, naar=gebruiker, geaccepteerd="ja")
+
+        tekstt = "Je bent al vrienden met " + toetevoegenvriend
+
+        if alvrienden:
+            return apology("Jullie zijn al vrienden")
+
+        aluitgenodigd = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND uitgenodigd=:uitgenodigd",
+                                    van=toetevoegenvriend, naar=gebruiker, uitgenodigd="ja")
+
+        if aluitgenodigd:
+            return redirect("/verzoeken")
+
+        nogeenkeeruitnodigen = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
+                                           van=toetevoegenvriend, naar=gebruiker, geaccepteerd="nee")
+        if nogeenkeeruitnodigen:
+            db.execute("UPDATE verzoeken (van, naar, geaccepteerd) VALUES (:van, :naar, :geaccepteerd)",
+                        van=gebruiker, naar=toetevoegenvriend, geaccepteerd="NULL")
 
         else:
 
-            db.execute("INSERT INTO verzoeken (van, naar) VALUES (:van, :naar)", van=gebruiker, naar=toetevoegenvriend)
+            db.execute("INSERT INTO verzoeken (van, naar, uitgenodigd) VALUES (:van, :naar, :uitgenodigd)",
+                        van=gebruiker, naar=toetevoegenvriend, uitgenodigd="ja")
 
             return render_template("toegevoegd.html", toetevoegenvriend=toetevoegenvriend)
-            # return jsonify({"vriend" : toetevoegenvriend})
 
     return render_template("vriendtoevoegen.html")
 
@@ -212,6 +231,32 @@ def toegevoegd():
 def vriendenlijst():
     return render_template("vriendenlijst.html")
 
+@app.route("/geaccepteerd", methods=["GET", "POST"])
+@login_required
+def geaccepteerd():
+
+    accepteren = request.form.get("accepteren")
+    gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+    gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+
+    db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd WHERE van=:van AND naar=:naar", geaccepteerd="ja",
+                van=accepteren, naar=gebruikerzelf)
+
+    return redirect("/verzoeken")
+
+@app.route("/geweigerd", methods=["GET", "POST"])
+@login_required
+def geweigerd():
+
+    weigeren = request.form.get("weigeren")
+    gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+    gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+
+    db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd WHERE van=:van AND naar=:naar", geaccepteerd="nee",
+                van=weigeren, naar=gebruikerzelf)
+
+    return redirect("/verzoeken")
+
 @app.route("/verzoeken", methods=["GET", "POST"])
 @login_required
 def verzoeken():
@@ -219,9 +264,8 @@ def verzoeken():
     gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
     gebruikerzelf = gebruiker[0]["gebruikersnaam"]
 
-    verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar", naar=gebruikerzelf)
-
-    print(verzoeken)
+    verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd IS NULL",
+                            naar=gebruikerzelf)
 
     return render_template("verzoeken.html", verzoeken=verzoeken)
 
@@ -231,19 +275,57 @@ def verzoeken():
     popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
     popular_results = popular["results"]
 '''
+def zoeken(zoekterm, pagenr):
+
+    # ophalen (per pagina)
+    from urllib.request import urlopen
+    url = "https://api.themoviedb.org/3/search/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&query=" + zoekterm + "&include_adult=false&page=" + str(pagenr)
+    response = json.loads(str((requests.get(url).content).decode('UTF-8')))
+
+    '''
+    # geen resultaten
+    if response["total_results"] == 0:
+        return False
+    # als paginanummer niet voorkomt
+    elif int(pagenr) > response["total_pages"]:
+        return False
+    else:
+    '''
+    return response
+
 @app.route("/zoeken", methods=["GET", "POST"])
 def zoekresultaat():
 
     if request.method == "POST":
-        from urllib.request import urlopen
-        zoekresultaten = json.loads(str((requests.get("https://api.themoviedb.org/3/search/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&query=" + request.form.get("zoekterm") + "&include_adult=false&page=1").content).decode('UTF-8')))
-        zoekresultaten = zoekresultaten["results"]
+        zoekterm = request.form.get("zoekterm")
 
-        return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten)
+        if not zoekterm: return apology("Geen zoekterm")
+
+        # resultaten pagina 1 - 30
+        elif zoeken(zoekterm, 1) != False:
+            zoekresultaten = zoeken(zoekterm, 1)["results"]
+            x = 2
+            while x < 30:
+                zoekresultaten += zoeken(zoekterm, x)["results"]
+                x += 1
+            return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten)
+
+        else: return apology("Iets ging mis")
+
+# Onderstaande ding is backup voor def zoekresultaat():
+'''
+    if request.method == "POST":
+        zoekterm = request.form.get("zoekterm")
+        if not zoekterm:
+            return apology("Geen zoekterm")
+        elif zoeken(zoekterm, 1) != False:
+            zoekresultaten = zoeken(zoekterm, 1)
+            return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten)
+'''
+
+
         ##als het nederlands is
         #"original_language":"nl"
-
-
  #       if not stockinfo:
  #           return apology("Stock is not valid")
  #       return render_template("stockprice.html", aandeel=stockinfo)
@@ -251,4 +333,27 @@ def zoekresultaat():
  #       return render_template("quote.html")
 
     # zoekresultaat TMDb id naar IMDb id (als OMDb input)
-    "https://api.themoviedb.org/3/movie/569050?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl"
+   # "https://api.themoviedb.org/3/movie/569050?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl"
+
+@app.route("/filminfo", methods=["GET", "POST"])
+def filminformatie():
+
+
+    tmdbid = request.form.get("tmdb_id")
+    if request.method == "POST":
+
+        # Alle informatie ophalen voor zoekresultaat (TMDb)
+        from urllib.request import urlopen
+        tmdb_url = str("https://api.themoviedb.org/3/movie/" + tmdbid + "?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl")
+        tmdb_response = json.loads(str((requests.get(tmdb_url).content).decode('UTF-8')))
+
+        # Als er geen IMDb id genoemd wordt
+        if tmdb_response["imdb_id"] == None or "tt" not in tmdb_response["imdb_id"]:
+            omdb_response = None
+
+        # Alle informatie ophalen voor zoekresultaat (OMDb)
+        else:
+            omdb_url = "http://www.omdbapi.com/?i=" + tmdb_response["imdb_id"] + "&apikey=be77e5d"
+            omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
+        return render_template("filminformatie.html", tmdb=tmdb_response, omdb=omdb_response)
+        print(omdb_url)

@@ -82,44 +82,24 @@
           </div>
         </nav>
 
-        <form action="{{ url_for('verzoeken') }}" method="post">
-          <div class="form-group">
-            <div class="col-md-12 control">
-                <div style="border-top: 1px solid#888; padding-top:15px; font-size:85%" >
-                    {% for verzoek in verzoeken %}
-                    <p><h3>{{verzoek.van}} heeft je een vriendschapsverzoek gestuurd!
-                        <button type="button" type="submit" name="button" class="btn btn-primary toevoegen" id={{verzoek.van}} >Vriend toevoegen</button>
-                        <button type="button" type="submit" name="button1" class="btn btn-light weigeren" id="_{{verzoek.van}}">Weigeren</button>
-                        <div class="alert alert-success friendship_alert" name="alert" role="alert" id="alert__{{verzoek.van}}" style="display:none;">
-                          {{verzoek.van}} is nu een vriend!
-                        </div>
-                        <div class="alert alert-dark weigeren_alert" name="alert1" role="alert" id="alert___{{verzoek.van}}" style="display:none;">
-                          Verzoek van {{verzoek.van}} is geweigerd!
-                        </div>
-                    </h3></p>
-                    {% endfor %}
-                    <script>
-                      $(document).ready(function(){
-                          // $(".friendship_alert").hide();
-                          // $(".weigeren_alert").hide();
-                          $("[name=button]").on("click", function(event) {
-                              let name = event.target.id;
-                              $("#alert__" + name).toggle();
-                              $("#" + name).toggle();
-                              $("#_" + name).toggle();
-                          });
-
-                          $("[name=button1]").on("click", function(event) {
-                              let name = event.target.id.slice(1);
-                              $("#alert___" + name).toggle();
-                              $("#" + name).toggle();
-                              $("#_" + name).toggle();
-                          });
-                      });
-                  </script>
-                </div>
-            </div>
-        </div>
+        <div class="form-group">
+          <div class="col-md-12 control">
+              <div style="border-top: 1px solid#888; padding-top:15px; font-size:85%" >
+                  {% for verzoek in verzoeken %}
+                  <p><h3>{{verzoek.van}} heeft je een vriendschapsverzoek gestuurd!
+                    <form action="/geaccepteerd" method="post">
+                      <input type="hidden" name="accepteren" value={{verzoek.van}}>
+                      <button class="btn btn-primary toevoegen" name="accepteren" type="submit">Vriend toevoegen</button>
+                    </form>
+                    <form action="/geweigerd" method="post">
+                      <input type="hidden" name="weigeren" value={{verzoek.van}}>
+                      <button class="btn btn-light weigeren" name="weigeren" type="submit">Weigeren</button>
+                    </form>
+                  </h3></p>
+                  {% endfor %}
+              </div>
+          </div>
+      </div>
         {% endif %}
 
         <main>
