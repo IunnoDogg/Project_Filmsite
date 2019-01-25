@@ -78,6 +78,10 @@ def register():
         elif not request.form.get("wachtwoord-confirmatie"):
             return apology("Geef het wachtwoord nogmaals op.")
 
+        # ensure the security question has been answered
+        elif not request.form.get("veiligheidsvraag"):
+            return apology("Beantwoord de veiligheidsvraag.")
+
         # ensure password equals password confirmation
         if request.form.get("wachtwoord") != request.form.get("wachtwoord-confirmatie"):
             return apology("De bevestiging komt niet overeen met het wachtwoord.")
@@ -85,14 +89,15 @@ def register():
         # hash the password
         wachtwoord = pwd_context.hash(request.form.get("wachtwoord"))
 
+
         # insert the user into the database
-        result = db.execute("INSERT INTO gebruikers (gebruikersnaam, wachtwoord, email) VALUES \
-                            (:gebruikersnaam, :wachtwoord, :email)",
+        result = db.execute("INSERT INTO gebruikers (gebruikersnaam, wachtwoord, email, veiligheidsvraag) VALUES \
+                            (:gebruikersnaam, :wachtwoord, :email, :veiligheidsvraag)",
                             gebruikersnaam=request.form.get("gebruikersnaam"), wachtwoord=wachtwoord,
-                            email=request.form.get("email"))
+                            email=request.form.get("email"), veiligheidsvraag=request.form.get("veiligheidsvraag"))
 
         if not result:
-            return apology("username already exists")
+            return apology("De gebruikersnaam bestaat al")
 
         # query database for username
         rows = db.execute("SELECT * FROM gebruikers WHERE gebruikersnaam = :gebruikersnaam",
@@ -238,6 +243,14 @@ def wachtwoordveranderen():
         if request.form.get("nieuw_wachtwoord") != request.form.get("wachtwoord_herhaling"):
             return apology("De wachtwoorden komen niet overeen")
 
+        # beantwoord de veiligheidsvraag
+        if not request.form.get('veiligheidsvraag'):
+            return apology("Beantwoord de veiligheidsvraag.")
+
+        # bevestig of het antwoord klopt
+        if len(account) != 1 or request.form.get('veiligheidsvraag') != account[0]['veiligheidsvraag']:
+            return apology("Het antwoord op de veiligheidsvraag klopt niet!")
+
         # maak een hash van het wachtwoord
         niet_hash = request.form.get("nieuw_wachtwoord")
         new_hash = CryptContext.hash(niet_hash)
@@ -252,35 +265,6 @@ def wachtwoordveranderen():
 
     else:
         return render_template("wachtwoordveranderen.html")
-
-
-@app.route("/gebruikersnaamveranderen", methods=["GET", "POST"])
-@login_required
-def gebruikersnaamveranderen():
-    """Verander gebruikersnaam"""
-
-    if request.method == 'POST':
-
-        # pak id uit database
-        account = db.execute("SELECT * FROM gebruikers WHERE id = :id", id=session['user_id'])
-
-        # check of een nieuwe gebruikersnaam is ingevuld
-        if not request.form.get("new_username"):
-            return apology("Vul een nieuwe gebruikersnaam in")
-
-        # de nieuwe naam
-        newname = request.form.get("new_username")
-
-        # update de gebruiker
-        resultaat = db.execute("UPDATE gebruikers SET gebruikersnaam=:gebruikersnaam WHERE id=:id", id=session["user_id"], gebruikersnaam=newname)
-
-        if not resultaat:
-            return apology("Iets ging fout...")
-
-        return redirect(url_for("index"))
-
-    else:
-        return render_template("gebruikersnaamveranderen.html")
 
 # ZOEKEN
 '''
