@@ -2,6 +2,7 @@ from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify
 from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
+from passlib.apps import custom_app_context as CryptContext
 from tempfile import mkdtemp
 import datetime, requests, json, xml.etree.ElementTree, urllib
 from helpers import *
@@ -82,14 +83,18 @@ def register():
         if request.form.get("wachtwoord") != request.form.get("wachtwoord-confirmatie"):
             return apology("De bevestiging komt niet overeen met het wachtwoord.")
 
+        # ensure the security question has been answered
+        elif not request.form.get("veiligheidsvraag"):
+            return apology("Beantwoord de veiligheidsvraag.")
+
         # hash the password
         wachtwoord = pwd_context.hash(request.form.get("wachtwoord"))
 
         # insert the user into the database
-        result = db.execute("INSERT INTO gebruikers (gebruikersnaam, wachtwoord, email) VALUES \
-                            (:gebruikersnaam, :wachtwoord, :email)",
+        result = db.execute("INSERT INTO gebruikers (gebruikersnaam, wachtwoord, email, veiligheidsvraag) VALUES \
+                            (:gebruikersnaam, :wachtwoord, :email, :veiligheidsvraag)",
                             gebruikersnaam=request.form.get("gebruikersnaam"), wachtwoord=wachtwoord,
-                            email=request.form.get("email"))
+                            email=request.form.get("email"), veiligheidsvraag=request.form.get("veiligheidsvraag"))
 
         if not result:
             return apology("username already exists")
@@ -110,7 +115,9 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Log user in."""
+    """
+    Log user in.
+    """
 
     # forget any user_id
     session.clear()
@@ -118,11 +125,9 @@ def login():
     # if user reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
-        # ensure username was submitted
+        # ensure form was filled
         if not request.form.get("gebruiker-inloggen"):
             return apology("Geef een gebruikersnaam op")
-
-        # ensure password was submitted
         elif not request.form.get("wachtwoord-inloggen"):
             return apology("Geef een wachtwoord op")
 
@@ -229,7 +234,16 @@ def toegevoegd():
 @app.route("/vriendenlijst")
 @login_required
 def vriendenlijst():
-    return render_template("vriendenlijst.html")
+
+    lijst = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+    gebruiker = lijst[0]["gebruikersnaam"]
+
+    vrienden = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd",
+                           naar=gebruiker, geaccepteerd="ja")
+
+    print(vrienden)
+
+    return render_template("vriendenlijst.html", vrienden=vrienden)
 
 @app.route("/geaccepteerd", methods=["GET", "POST"])
 @login_required
@@ -357,3 +371,63 @@ def filminformatie():
             omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
         return render_template("filminformatie.html", tmdb=tmdb_response, omdb=omdb_response)
         print(omdb_url)
+
+@app.route("/profiel")
+@login_required
+def profiel():
+    "Pas je profiel aan"
+    return render_template("profiel.html")
+
+
+@app.route("/wachtwoordveranderen", methods=["GET", "POST"])
+@login_required
+def wachtwoordveranderen():
+    """Verander wachtwoord"""
+
+    if request.method == 'POST':
+
+        # bevestig oud wachtwoord
+        if not request.form.get('wachtwoord'):
+            return apology("Vul je huidige wachtwoord in")
+
+        # pak id uit database
+        account = db.execute("SELECT * FROM gebruikers WHERE id = :id", id=session['user_id'])
+
+        # bevestig of het wachtwoord klopt
+        if len(account) != 1 or not pwd_context.verify(request.form.get('wachtwoord'), account[0]['wachtwoord']):
+            return apology("Het wachtwoord klopt niet!")
+
+        # check of een nieuw wachtwoord is ingevuld
+        if not request.form.get("nieuw_wachtwoord"):
+            return apology("Vul een nieuw wachtwoord in")
+
+        # check of het nieuwe wachtwoord is herhaald
+        if not request.form.get("wachtwoord_herhaling"):
+            return apology("Herhaal je nieuwe wachtwoord")
+
+        # controleer of beide wachtwoorden overeenkomen
+        if request.form.get("nieuw_wachtwoord") != request.form.get("wachtwoord_herhaling"):
+            return apology("De wachtwoorden komen niet overeen")
+
+        # beantwoord de veiligheidsvraag
+        if not request.form.get('veiligheidsvraag'):
+            return apology("Beantwoord de veiligheidsvraag.")
+
+        # bevestig of het antwoord klopt
+        if len(account) != 1 or request.form.get('veiligheidsvraag') != account[0]['veiligheidsvraag']:
+            return apology("Het antwoord op de veiligheidsvraag klopt niet!")
+
+        # maak een hash van het wachtwoord
+        niet_hash = request.form.get("nieuw_wachtwoord")
+        new_hash = CryptContext.hash(niet_hash)
+
+        # update de gebruiker
+        resultaat = db.execute("UPDATE gebruikers SET wachtwoord=:wachtwoord WHERE id=:id", id=session["user_id"], wachtwoord=new_hash)
+
+        if not resultaat:
+            return apology("Iets ging fout...")
+
+        return redirect(url_for("index"))
+
+    else:
+        return render_template("wachtwoordveranderen.html")
