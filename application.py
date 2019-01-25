@@ -49,10 +49,6 @@ def homepage():
 
     return render_template("homepage.html", results=popular_results)
 
-@app.route("/wachtwoord")
-def wachtwoord():
-    return render_template("wachtwoord.html")
-
 @app.route("/overons")
 def overons():
     return render_template("overons.html")
