@@ -18,8 +18,14 @@
     <div id="container">
     {%- for i in zoekresultaten -%}
       {% if i.original_language == "nl" %}
-
+      {% if session user_id %}
       <form action="/filminfo" method="post">
+        <input type="hidden" name="tmdb_id" value="{{i.id}}">
+        <button type="submit" name="tmdb_id"><IMG src="http://image.tmdb.org/t/p/w185{{i.poster_path}}" title="{{i.title}} ({{i.release_date[:4]}})"></button>
+
+      </form>
+      {% else %}
+      <form action="/filminfo_non" method="post">
         <input type="hidden" name="tmdb_id" value="{{i.id}}">
         <button type="submit" name="tmdb_id"><IMG src="http://image.tmdb.org/t/p/w185{{i.poster_path}}" title="{{i.title}} ({{i.release_date[:4]}})"></button>
 

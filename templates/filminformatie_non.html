@@ -39,28 +39,6 @@
     <div id="linkerkolom">
       <p>
         <img src="http://image.tmdb.org/t/p/w185{{tmdb.poster_path}}" class="homepage_poster">
-        <form action="/addfavorite" method="post">
-          <div class="form-group">
-            <div class="col-sm-12 controls">
-              {% if alfavo != True %}
-              <p align="center">
-                <button class="btn btn-outline-success" id="{{tmdb.id}}" type="submit" name="favorieten" value="{{tmdb.id}}">Favoriet</button>
-              </p>
-              {% endif %}
-            </div>
-          </div>
-        </form>
-        <form action="/removefavorite" method="post">
-          <div class="form-group">
-            <div class="col-sm-12 controls">
-              {% if alfavo == True %}
-              <p align="center">
-                <button class="btn btn-outline-danger" id="{{tmdb.id}}" type="submit" name="geenfavo" value="{{tmdb.id}}">Verwijder uit favorieten</button>
-              </p>
-              {% endif %}
-            </div>
-          </div>
-        </form>
       </p>
     </div>
       <div id="rechterkolom">

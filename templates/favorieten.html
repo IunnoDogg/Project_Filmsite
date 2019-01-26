@@ -8,11 +8,11 @@
 
 <center><h2>Favorieten</h2></center>
 <hr>
-<form action="/favorieten" method="post">
-  <ul style="list-style-type:square;">
-    <li>
-      {{tmdb.original_title}}
-    </li>
-  </ul>
-</form>
+<ul style="list-style-type:square;">
+  {% for favoriet in favorieten %}
+  <li>
+    {{favoriet.film_id}}
+  </li>
+  {% endfor %}
+</ul>
 {% endblock %}

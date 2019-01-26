@@ -16,7 +16,7 @@
     <!-- Tabellen in JinJa; https://stackoverflow.com/questions/9198334/how-to-build-up-a-html-table-with-a-simple-for-loop-in-jinja2 -->
     <i>
         {%- for i in results[:12] -%}
-        <form action="/filminfo" method="post">
+        <form action="/filminfo_non" method="post">
             <input type="hidden" name="tmdb_id" value="{{i.id}}"></input>
             <button type="submit"><IMG src="http://image.tmdb.org/t/p/w185{{i.poster_path}}" title="{{i.title}} ({{i.release_date[:4]}})"></button>
         </form>

@@ -365,14 +365,16 @@ def zoekresultaat():
    # "https://api.themoviedb.org/3/movie/569050?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl"
 
 @app.route("/filminfo", methods=["GET", "POST"])
+@login_required
 def filminformatie():
 
-    tmdbid = request.form.get("tmdb_id")
     if request.method == "POST":
+
+        tmdb_id = request.form.get("tmdb_id")
 
         # Alle informatie ophalen voor zoekresultaat (TMDb)
         from urllib.request import urlopen
-        tmdb_url = str("https://api.themoviedb.org/3/movie/" + tmdbid + "?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl")
+        tmdb_url = str("https://api.themoviedb.org/3/movie/" + tmdb_id + "?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl")
         tmdb_response = json.loads(str((requests.get(tmdb_url).content).decode('UTF-8')))
 
         # Als er geen IMDb id genoemd wordt
@@ -383,7 +385,37 @@ def filminformatie():
         else:
             omdb_url = "http://www.omdbapi.com/?i=" + tmdb_response["imdb_id"] + "&apikey=be77e5d"
             omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
-        return render_template("filminformatie.html", tmdb=tmdb_response, omdb=omdb_response)
+
+        gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+        gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+
+        favorieten = db.execute("SELECT film_id FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikerzelf)
+        alfavo = any([favoriet['film_id'] == tmdb_id for favoriet in favorieten])
+
+        return render_template("filminformatie.html", tmdb=tmdb_response, omdb=omdb_response, alfavo=alfavo)
+
+@app.route("/filminfo_non", methods=["GET", "POST"])
+def filminformatie_non():
+
+    if request.method == "POST":
+
+        tmdb_id = request.form.get("tmdb_id")
+
+        # Alle informatie ophalen voor zoekresultaat (TMDb)
+        from urllib.request import urlopen
+        tmdb_url = str("https://api.themoviedb.org/3/movie/" + tmdb_id + "?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl")
+        tmdb_response = json.loads(str((requests.get(tmdb_url).content).decode('UTF-8')))
+
+        # Als er geen IMDb id genoemd wordt
+        if tmdb_response["imdb_id"] == None or "tt" not in tmdb_response["imdb_id"]:
+            omdb_response = None
+
+        # Alle informatie ophalen voor zoekresultaat (OMDb)
+        else:
+            omdb_url = "http://www.omdbapi.com/?i=" + tmdb_response["imdb_id"] + "&apikey=be77e5d"
+            omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
+
+        return render_template("filminformatie_non.html", tmdb=tmdb_response, omdb=omdb_response)
 
 @app.route("/mijnprofiel")
 @login_required
@@ -567,7 +599,72 @@ def accountverwijderen():
 @app.route("/favorieten", methods=["GET", "POST"])
 @login_required
 def favorieten():
-    tmdb = request.form.get("favorieten")
-    print(tmdb)
 
-    return render_template("favorieten.html", tmdb=tmdb)
+    gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+    gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+
+    favorieten = db.execute("SELECT film_id FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikerzelf)
+
+    return render_template("favorieten.html", favorieten=favorieten)
+
+@app.route("/addfavorite", methods=["POST"])
+@login_required
+def addfavorite():
+
+    if request.method == "POST":
+
+        gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+        gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+
+        tmdb_id = request.form.get("favorieten")
+
+        # Alle informatie ophalen voor zoekresultaat (TMDb)
+        from urllib.request import urlopen
+        tmdb_url = str( "https://api.themoviedb.org/3/movie/" + tmdb_id + "?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl")
+        tmdb_response = json.loads(str((requests.get(tmdb_url).content).decode('UTF-8')))
+
+        # Als er geen IMDb id genoemd wordt
+        if tmdb_response["imdb_id"] == None or "tt" not in tmdb_response["imdb_id"]:
+            omdb_response = None
+
+        # Alle informatie ophalen voor zoekresultaat (OMDb)
+        else:
+            omdb_url = "http://www.omdbapi.com/?i=" + tmdb_response["imdb_id"] + "&apikey=be77e5d"
+            omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
+
+        favorieten = db.execute("SELECT film_id FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikerzelf)
+
+        db.execute("INSERT INTO favorieten (gebruiker, film_id) VALUES (:gebruiker, :film_id)",
+                    gebruiker=gebruikerzelf, film_id=tmdb_id)
+
+        return render_template("addfavorite.html", tmdb=tmdb_response, omdb=omdb_response, favorieten=favorieten)
+
+@app.route("/removefavorite", methods=["POST"])
+@login_required
+def removefavorite():
+
+    if request.method == "POST":
+
+        gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+        gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+
+        tmdb_id = request.form.get("geenfavo")
+
+        # Alle informatie ophalen voor zoekresultaat (TMDb)
+        from urllib.request import urlopen
+        tmdb_url = str( "https://api.themoviedb.org/3/movie/" + tmdb_id + "?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl")
+        tmdb_response = json.loads(str((requests.get(tmdb_url).content).decode('UTF-8')))
+
+        # Als er geen IMDb id genoemd wordt
+        if tmdb_response["imdb_id"] == None or "tt" not in tmdb_response["imdb_id"]:
+            omdb_response = None
+
+        # Alle informatie ophalen voor zoekresultaat (OMDb)
+        else:
+            omdb_url = "http://www.omdbapi.com/?i=" + tmdb_response["imdb_id"] + "&apikey=be77e5d"
+            omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
+
+        db.execute("DELETE FROM favorieten WHERE gebruiker=:gebruiker AND film_id=:film_id",
+                    gebruiker=gebruikerzelf, film_id=tmdb_id)
+
+        return render_template("removefavorite.html", tmdb=tmdb_response, omdb=omdb_response)
