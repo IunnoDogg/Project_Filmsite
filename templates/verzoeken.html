@@ -1,27 +1,27 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Verzoeken
+    Vriendschapsverzoeken
 {% endblock %}
 
 {% block main %}
-<center><bold><h3>Vriendschapsverzoeken</h3></bold></center>
-<center><hr>
+<center><bold><h2>Vriendschapsverzoeken</h2></bold></center>
+<hr>
+<form action="/verzoeken" method="post">
   <div class="form-group">
     <div class="col-md-12 control">
       {% for verzoek in verzoeken %}
-        <p><h3>{{verzoek.van}} heeft je een vriendschapsverzoek gestuurd!
-          <form action="/geaccepteerd" method="post">
-            <input type="hidden" name="accepteren" value={{verzoek.van}}>
-            <button class="btn btn-primary toevoegen" name="accepteren" type="submit">Vriend toevoegen</button>
-          </form>
-          <form action="/geweigerd" method="post">
-            <input type="hidden" name="weigeren" value={{verzoek.van}}>
-            <button class="btn btn-light weigeren" name="weigeren" type="submit">Weigeren</button>
-          </form>
-        </h3></p>
+      <ul style="list-style-type:square;">
+        <li>
+          <p><h5>Vriendschapsverzoek van {{verzoek.van}} !</h5></p>
+          <button class="btn btn-outline-success btn-sm" name="accepteren" value="{{verzoek.van}}" type="submit">Vriend toevoegen</button>
+          <button class="btn btn-outline-danger btn-sm" name="weigeren" value="_{{verzoek.van}}" type="submit">Weigeren</button>
+        </li>
+      </ul>
       {% endfor %}
     </div>
   </div>
-</center>
+</form>
+<hr>
+<center><strong><h5>Zie hier jouw <a href="/vriendenlijst">vrienden</a>!</h5></strong></center>
 {% endblock %}

@@ -1,12 +1,23 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Homepage user logged in
+    Homepage
 {% endblock %}
 
 {% block main %}
 <center><bold><h3>Populairste Nederlandse films</h3></bold></center>
-<center><hr>
+  {% if length > 0 %}
+  <bold style="float:right; position: relative; top:-40px">
+    <a href="/verzoeken">
+      <button type="button" class="btn btn-light">
+      Je hebt vriendschapsverzoeken <span class="badge badge-danger">{{length}}</span>
+      </button>
+    </a>
+  </bold>
+  {% endif %}
+<center>
+<hr>
+<br>
 
   <!-- Tabellen in JinJa; https://stackoverflow.com/questions/9198334/how-to-build-up-a-html-table-with-a-simple-for-loop-in-jinja2 -->
   {%- for i in results[:12] -%}

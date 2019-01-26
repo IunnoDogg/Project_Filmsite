@@ -5,20 +5,48 @@
 {% endblock %}
 
 {% block main %}
-<center><bold><h3>Vriendenlijst</h3></bold></center>
+<center><strong><h2>Vriendenlijst</h2></strong></center>
+{% if length > 0 %}
+<bold style="float:right; position: relative; top:-40px">
+  <a href="/verzoeken">
+    <button type="button" class="btn btn-light">
+    Je hebt vriendschapsverzoeken <span class="badge badge-danger">{{length}}</span>
+    </button>
+  </a>
+</bold>
+{% endif %}
+
 <hr>
-<center>
-  {% for vriend in vrienden %}
-  <p><h3>{{vriend.van}}</h3></p>
-  {% endfor %}
-</center>
-<center><hr>
-  <form action="{{ url_for('vriendenlijst') }}" method="post">
-    <div class="form-group">
-      <div class="col-md-12 control">
-        <a href="{{ url_for('verzoeken') }}">Vriendschapsverzoeken</a>
+{% for vriend in vrienden %}
+<ul style="list-style-type:square;">
+  <li><h4>{{vriend.van}}</h4></li>
+</ul>
+{% endfor %}
+
+<hr>
+
+<style type='text/css'>
+  p {
+    padding: 5px;
+  }
+</style>
+<form action="{{ url_for('vriend') }}" method="post">
+  <p>
+    <center>
+      <h5>Iemand nog geen vriend van je?</h5>
+      <div class="text">
+        <h6>Voeg diegene nu toe!</h6>
       </div>
-    </div>
-  </form>
-</center>
+      <div class="col-md-4 col-md-offset-3">
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Noem gebruikersnaam" name="vriend" aria-label="vriend" aria-describedby="button-addon2">
+          <button class="btn btn-outline-success" type="submit" id="submit">Voeg toe</button>
+        </div>
+      </div>
+      <div class="text">
+        <font size="1" color="red"><i><b>Let op alleen gebruikersnamen, geen e-mails</b></i></font>
+      </div>
+    </center>
+  </p>
+</form>
 {% endblock %}

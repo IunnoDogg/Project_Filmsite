@@ -2,7 +2,6 @@ from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify
 from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
-from passlib.apps import custom_app_context as CryptContext
 from tempfile import mkdtemp
 import datetime, requests, json, xml.etree.ElementTree, urllib
 from helpers import *
@@ -37,7 +36,20 @@ def index():
     from urllib.request import urlopen
     popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
     popular_results = popular["results"]
-    return render_template("index.html", results=popular_results)
+
+    gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+    gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+
+    verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd IS NULL",
+                            naar=gebruikerzelf)
+
+    if verzoeken:
+        length = len(verzoeken)
+
+    else:
+        length = 0
+
+    return render_template("index.html", results=popular_results, length=length)
 
 @app.route("/")
 def homepage():
@@ -118,7 +130,6 @@ def login():
     """
     Log user in.
     """
-
     # forget any user_id
     session.clear()
 
@@ -209,7 +220,7 @@ def vriend():
                                     van=toetevoegenvriend, naar=gebruiker, uitgenodigd="ja")
 
         if aluitgenodigd:
-            return redirect("/verzoeken")
+            return apology("Deze gebruiker heeft je al uitgenodigd")
 
         nogeenkeeruitnodigen = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
                                            van=toetevoegenvriend, naar=gebruiker, geaccepteerd="nee")
@@ -241,35 +252,19 @@ def vriendenlijst():
     vrienden = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd",
                            naar=gebruiker, geaccepteerd="ja")
 
-    print(vrienden)
-
-    return render_template("vriendenlijst.html", vrienden=vrienden)
-
-@app.route("/geaccepteerd", methods=["GET", "POST"])
-@login_required
-def geaccepteerd():
-
-    accepteren = request.form.get("accepteren")
     gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
     gebruikerzelf = gebruiker[0]["gebruikersnaam"]
 
-    db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd WHERE van=:van AND naar=:naar", geaccepteerd="ja",
-                van=accepteren, naar=gebruikerzelf)
+    verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd IS NULL",
+                            naar=gebruikerzelf)
 
-    return redirect("/verzoeken")
+    if verzoeken:
+        length = len(verzoeken)
 
-@app.route("/geweigerd", methods=["GET", "POST"])
-@login_required
-def geweigerd():
+    else:
+        length = 0
 
-    weigeren = request.form.get("weigeren")
-    gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
-    gebruikerzelf = gebruiker[0]["gebruikersnaam"]
-
-    db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd WHERE van=:van AND naar=:naar", geaccepteerd="nee",
-                van=weigeren, naar=gebruikerzelf)
-
-    return redirect("/verzoeken")
+    return render_template("vriendenlijst.html", vrienden=vrienden, length=length)
 
 @app.route("/verzoeken", methods=["GET", "POST"])
 @login_required
@@ -280,6 +275,26 @@ def verzoeken():
 
     verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd IS NULL",
                             naar=gebruikerzelf)
+
+    if request.method == "POST":
+        accepteren = request.form.get("accepteren")
+        weigerenn = request.form.get("weigeren")
+
+        gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+        gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+
+        if not accepteren:
+            weigeren = weigerenn[1:]
+            db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd WHERE van=:van AND naar=:naar", geaccepteerd="nee",
+                        van=weigeren, naar=gebruikerzelf)
+
+            return redirect("/verzoeken")
+
+        else:
+            db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd WHERE van=:van AND naar=:naar", geaccepteerd="ja",
+                        van=accepteren, naar=gebruikerzelf)
+
+            return redirect("/verzoeken")
 
     return render_template("verzoeken.html", verzoeken=verzoeken)
 
@@ -352,7 +367,6 @@ def zoekresultaat():
 @app.route("/filminfo", methods=["GET", "POST"])
 def filminformatie():
 
-
     tmdbid = request.form.get("tmdb_id")
     if request.method == "POST":
 
@@ -370,28 +384,48 @@ def filminformatie():
             omdb_url = "http://www.omdbapi.com/?i=" + tmdb_response["imdb_id"] + "&apikey=be77e5d"
             omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
         return render_template("filminformatie.html", tmdb=tmdb_response, omdb=omdb_response)
-        print(omdb_url)
 
-@app.route("/profiel")
+@app.route("/mijnprofiel")
 @login_required
-def profiel():
+def mijnprofiel():
     "Pas je profiel aan"
-    return render_template("profiel.html")
 
+    gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+    gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+
+    verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd IS NULL",
+                            naar=gebruikerzelf)
+
+    if verzoeken:
+        length = len(verzoeken)
+
+    else:
+        length = 0
+
+    return render_template("mijnprofiel.html", length=length)
+
+@app.route("/wachtwoordvergeten", methods=["GET", "POST"])
+def wachtwoordvergeten():
+    if request.method == "POST":
+        return render_template("wachtwoordveranderen.html")
+
+    return render_template("wachtwoordvergeten.html")
 
 @app.route("/wachtwoordveranderen", methods=["GET", "POST"])
-@login_required
 def wachtwoordveranderen():
     """Verander wachtwoord"""
 
     if request.method == 'POST':
 
-        # bevestig oud wachtwoord
+        if not request.form.get('gebruikersnaam'):
+            return apology("Vul je gebruikersnaam in")
+
         if not request.form.get('wachtwoord'):
             return apology("Vul je huidige wachtwoord in")
 
         # pak id uit database
-        account = db.execute("SELECT * FROM gebruikers WHERE id = :id", id=session['user_id'])
+        account = db.execute("SELECT * FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam",
+                              gebruikersnaam=request.form.get('gebruikersnaam'))
 
         # bevestig of het wachtwoord klopt
         if len(account) != 1 or not pwd_context.verify(request.form.get('wachtwoord'), account[0]['wachtwoord']):
@@ -417,9 +451,66 @@ def wachtwoordveranderen():
         if len(account) != 1 or request.form.get('veiligheidsvraag') != account[0]['veiligheidsvraag']:
             return apology("Het antwoord op de veiligheidsvraag klopt niet!")
 
+        wachtwoordcheck = db.execute("SELECT wachtwoord FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam",
+                                      gebruikersnaam=account[0]["gebruikersnaam"])
+
+        if pwd_context.verify(request.form.get("nieuw_wachtwoord"), wachtwoordcheck[0]["wachtwoord"]):
+            return apology("Niet mogelijk om je huidige wachtwoord te kiezen")
+
+        # maak een hash van het wachtwoord
+        new_hash = pwd_context.hash(request.form.get("nieuw_wachtwoord"))
+        # new_hash = CryptContext.hash(niet_hash)
+
+        # update de gebruiker
+        resultaat = db.execute("UPDATE gebruikers SET wachtwoord=:wachtwoord WHERE gebruikersnaam=:gebruikersnaam",
+                                gebruikersnaam=request.form.get('gebruikersnaam'), wachtwoord=new_hash)
+
+        if not resultaat:
+            return apology("Iets ging fout...")
+
+        return render_template("wachtwoordveranderd.html")
+
+    else:
+        return render_template("wachtwoordveranderen.html")
+
+@app.route("/wachtwoordgebruikers", methods=["GET", "POST"])
+def wachtwoordgebruikers():
+    """Verander wachtwoord"""
+
+    if request.method == 'POST':
+
+        if not request.form.get('wachtwoord'):
+            return apology("Vul je huidige wachtwoord in")
+
+        # pak id uit database
+        account = db.execute("SELECT * FROM gebruikers WHERE id = :id", id=session['user_id'])
+
+        # bevestig of het wachtwoord klopt
+        if len(account) != 1 or not pwd_context.verify(request.form.get('wachtwoord'), account[0]['wachtwoord']):
+            return apology("Het wachtwoord klopt niet!")
+
+        # check of een nieuw wachtwoord is ingevuld
+        if not request.form.get("nieuw_wachtwoord"):
+            return apology("Vul een nieuw wachtwoord in")
+
+        # check of het nieuwe wachtwoord is herhaald
+        if not request.form.get("wachtwoord_herhaling"):
+            return apology("Herhaal je nieuwe wachtwoord")
+
+        # controleer of beide wachtwoorden overeenkomen
+        if request.form.get("nieuw_wachtwoord") != request.form.get("wachtwoord_herhaling"):
+            return apology("De wachtwoorden komen niet overeen")
+
+        wachtwoordcheck = db.execute("SELECT wachtwoord FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam",
+                                      gebruikersnaam=account[0]["gebruikersnaam"])
+
+        if pwd_context.verify(request.form.get("nieuw_wachtwoord"), wachtwoordcheck[0]["wachtwoord"]):
+            return apology("Niet mogelijk om je huidige wachtwoord te kiezen")
+
         # maak een hash van het wachtwoord
         niet_hash = request.form.get("nieuw_wachtwoord")
-        new_hash = CryptContext.hash(niet_hash)
+        new_hash = pwd_context.hash(niet_hash)
+        # new_hash = CryptContext.hash(niet_hash)
 
         # update de gebruiker
         resultaat = db.execute("UPDATE gebruikers SET wachtwoord=:wachtwoord WHERE id=:id", id=session["user_id"], wachtwoord=new_hash)
@@ -427,7 +518,56 @@ def wachtwoordveranderen():
         if not resultaat:
             return apology("Iets ging fout...")
 
-        return redirect(url_for("index"))
+        return render_template("wachtwoordveranderd.html")
 
     else:
-        return render_template("wachtwoordveranderen.html")
+        return render_template("wachtwoordgebruikers.html")
+
+@app.route("/wachtwoordveranderd")
+def wachtwoordveranderd():
+    return render_template("wachtwoordveranderd.html")
+
+@app.route("/accountverwijderen", methods=["GET", "POST"])
+@login_required
+def accountverwijderen():
+    if request.method == "POST":
+
+        gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+        gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+
+        wachtwoord = request.form.get("wachtwoord")
+        print(wachtwoord)
+        wachtwoord_herhaling = request.form.get("wachtwoord_herhaling")
+
+        if not wachtwoord:
+            return apology("Geef jouw wachtwoord op.")
+
+        if not wachtwoord_herhaling:
+            return apology("Geef herhaling van jouw wachtwoord op.")
+
+        if wachtwoord != wachtwoord_herhaling:
+            return apology("De bevestiging komt niet overeen met het wachtwoord.")
+
+        wachtwoordcheck = db.execute("SELECT wachtwoord FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam",
+                                      gebruikersnaam=gebruikerzelf)
+
+        if len(wachtwoordcheck) != 1 or not pwd_context.verify(request.form.get("wachtwoord"), wachtwoordcheck[0]["wachtwoord"]):
+            return apology("Het opgegeven wachtwoord klopt niet")
+
+        else:
+            session.clear()
+
+            db.execute("DELETE FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam", gebruikersnaam=gebruikerzelf)
+            db.execute("DELETE FROM verzoeken WHERE naar=:naar OR van=:van", naar=gebruikerzelf, van=gebruikerzelf)
+
+            return render_template("verwijderd.html", gebruikerzelf=gebruikerzelf)
+
+    return render_template("accountverwijderen.html")
+
+@app.route("/favorieten", methods=["GET", "POST"])
+@login_required
+def favorieten():
+    tmdb = request.form.get("favorieten")
+    print(tmdb)
+
+    return render_template("favorieten.html", tmdb=tmdb)

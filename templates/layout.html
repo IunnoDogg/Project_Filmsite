@@ -12,7 +12,7 @@
 
         {%block head %} {% endblock %}
 
-        <title>Nederlandse film {% block title %}{% endblock %}</title>
+        <title>NL Film: {% block title %}{% endblock %}</title>
     </head>
     <body>
 
@@ -37,9 +37,12 @@
                         Vrienden
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('vriend') }}">Vriend toevoegen</a>
+                            <a class="dropdown-item" href="{{ url_for('verzoeken') }}">Vriendschapsverzoeken</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ url_for('vriendenlijst') }}">Vriendenlijst </a>
+                            <a class="dropdown-item" href="{{ url_for('vriendenlijst') }}">Vriendenlijst</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ url_for('vriend') }}">Vriend toevoegen</a>
+
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -47,6 +50,8 @@
                         Lijsten
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="/favorieten">Favorieten</a>
+                            <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="#">Bekeken films</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="#">Mijn kijklijst</a>
@@ -72,7 +77,11 @@
                             Mijn account
                             </a>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="{{ url_for('profiel')}}">Account wijzigen</a>
+                                <a class="dropdown-item" href="{{ url_for('mijnprofiel')}}">Mijn profiel</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{ url_for('wachtwoordgebruikers')}}">Wachtwoord wijzigen</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{ url_for('accountverwijderen')}}">Account verwijderen</a>
                             </div>
                         </li>
                     </ul>
@@ -114,7 +123,6 @@
             </div>
         </nav>
         {% endif %}
-
         <main>
         {% block main %}
 

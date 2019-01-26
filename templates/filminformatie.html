@@ -27,13 +27,28 @@
       width: 100%;
     }
   }
+  #linker {
+    float:left;
+    width:25%;
+  }
 </style>
 
 <center><h3>{{tmdb.original_title}}</h3></center>
 <hr>
   <div id="wrap">
     <div id="linkerkolom">
-      <p><img src="http://image.tmdb.org/t/p/w185{{tmdb.poster_path}}" class="homepage_poster"></p>
+      <p>
+        <img src="http://image.tmdb.org/t/p/w185{{tmdb.poster_path}}" class="homepage_poster">
+        {% if session.user_id %}
+        <form action="/favorieten" method="post">
+          <div class="form-group">
+            <div class="col-sm-12 controls">
+                <button class="btn btn-outline-success" type="submit" name="favorieten" value="{{tmdb}}">Favoriet</button>
+            </div>
+          </div>
+        </form>
+        {% endif %}
+      </p>
     </div>
       <div id="rechterkolom">
 
@@ -73,3 +88,4 @@
     </div>
   </hr>
 {% endblock %}
+

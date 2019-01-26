@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Favorieten
+{% endblock %}
+
+{% block main %}
+
+<center><h2>Favorieten</h2></center>
+<hr>
+<form action="/favorieten" method="post">
+  <ul style="list-style-type:square;">
+    <li>
+      {{tmdb.original_title}}
+    </li>
+  </ul>
+</form>
+{% endblock %}
