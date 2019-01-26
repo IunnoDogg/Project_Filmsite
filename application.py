@@ -603,7 +603,7 @@ def favorieten():
     gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
     gebruikerzelf = gebruiker[0]["gebruikersnaam"]
 
-    favorieten = db.execute("SELECT film_id FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikerzelf)
+    favorieten = db.execute("SELECT titel FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikerzelf)
 
     return render_template("favorieten.html", favorieten=favorieten)
 
@@ -634,8 +634,8 @@ def addfavorite():
 
         favorieten = db.execute("SELECT film_id FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikerzelf)
 
-        db.execute("INSERT INTO favorieten (gebruiker, film_id) VALUES (:gebruiker, :film_id)",
-                    gebruiker=gebruikerzelf, film_id=tmdb_id)
+        db.execute("INSERT INTO favorieten (gebruiker, film_id, titel) VALUES (:gebruiker, :film_id, :titel)",
+                    gebruiker=gebruikerzelf, film_id=tmdb_id, titel=tmdb_response["original_title"])
 
         return render_template("addfavorite.html", tmdb=tmdb_response, omdb=omdb_response, favorieten=favorieten)
 
