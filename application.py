@@ -796,3 +796,30 @@ def legehistorie():
     lengte = lengte_vv()
 
     return render_template("legehistorie.html", lengte=lengte)
+
+@app.route("/mijnkijklijst", methods=["GET", "POST"])
+@login_required
+def mijnkijklijst():
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+
+    return render_template("mijnkijklijst.html", lengte=lengte)
+
+@app.route("/mijnlijsten", methods=["GET", "POST"])
+@login_required
+def mijnlijsten():
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+
+    return render_template("mijnlijsten.html", lengte=lengte)
+
+@app.route("/checkins", methods=["GET", "POST"])
+@login_required
+def checkins():
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+
+    return render_template("checkins.html", lengte=lengte)
