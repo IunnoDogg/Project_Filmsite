@@ -97,7 +97,7 @@ def ophalenmislukt(name, error):
 def select(zoekterm, tabel, gelijke_var, variabelen):
 
     a = "SELECT"
-    b = '("{}" '.format(a)
+    b = '("{} '.format(a)
     c = '{} '.format(zoekterm)
     d = "FROM"
     e = '{} '.format(d)
@@ -226,12 +226,10 @@ def login():
         ophalenmislukt("gebruiker-inloggen", "Geef een gebruikersnaam op")
         ophalenmislukt("wachtwoord-inloggen", "Geef een wachtwoord op")
 
-        # query database for username
-        t = ophalen("gebruiker-inloggen")
-        x = "gebruikersnaam=" + t
-        print(x)
-        rows = select("*", "gebruikers", "gebruikersnaam=:gebruikersnaam", x)
-        print(a)
+        # # query database for username
+        # x = "gebruikersnaam=" + ophalen("gebruiker-inloggen")
+        # a = select("*", "gebruikers", "gebruikersnaam=:gebruikersnaam", x)
+        # print(a)
         rows = db.execute("SELECT * FROM gebruikers WHERE gebruikersnaam = :gebruikersnaam",
                           gebruikersnaam=request.form.get("gebruiker-inloggen"))
 
@@ -400,6 +398,7 @@ def zoeken(zoekterm, pagenr):
     return response
 
 @app.route("/zoeken", methods=["GET", "POST"])
+@login_required
 def zoekresultaat():
 
     if request.method == "POST":
@@ -415,14 +414,37 @@ def zoekresultaat():
                 zoekresultaten += zoeken(zoekterm, x)["results"]
                 x += 1
 
-            if session["user_id"] > 0:
+            if not session["user_id"]:
+                return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten)
+
+            else:
                 gebruikersnaam = gebruiker()
                 verzoeken = verzoek()
                 lengte = lengte_vv()
+
                 return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten, lengte=lengte)
 
-            else:
-                return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten)
+        else:
+            return apology("Iets ging mis")
+
+@app.route("/zoekennon", methods=["GET", "POST"])
+def zoekresultaat_non():
+
+    if request.method == "POST":
+        zoekterm = request.form.get("zoekterm")
+
+        if not zoekterm: return apology("Geen zoekterm")
+
+        # resultaten pagina 1 - 30
+        elif zoeken(zoekterm, 1) != False:
+            zoekresultaten = zoeken(zoekterm, 1)["results"]
+            x = 2
+            while x < 30:
+                zoekresultaten += zoeken(zoekterm, x)["results"]
+                x += 1
+
+
+            return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten)
 
         else:
             return apology("Iets ging mis")
