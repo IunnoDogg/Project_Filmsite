@@ -5,27 +5,26 @@
 {% endblock %}
 
 {% block main %}
+<style>
+    form { display: inline-block; }
+    #button {
+    display:inline-block;
+    /**other codes**/
+    }
+</style>
 <center><bold><h3>Populairste Nederlandse films</h3></bold></center>
-  {% if length > 0 %}
-  <bold style="float:right; position: relative; top:-40px">
-    <a href="/verzoeken">
-      <button type="button" class="btn btn-light">
-      Je hebt vriendschapsverzoeken <span class="badge badge-danger">{{length}}</span>
-      </button>
-    </a>
-  </bold>
-  {% endif %}
 <center>
 <hr>
 <br>
 
-  <!-- Tabellen in JinJa; https://stackoverflow.com/questions/9198334/how-to-build-up-a-html-table-with-a-simple-for-loop-in-jinja2 -->
-  {%- for i in results[:12] -%}
-  <form action="/filminfo" method="post">
+    {%- for i in results[:12] -%}
+     <form action="/filminfo" method="post">
     <input type="hidden" name="tmdb_id" value="{{i.id}}"></input>
-    <button type="submit"><IMG src="http://image.tmdb.org/t/p/w185{{i.poster_path}}" title="{{i.title}} ({{i.release_date[:4]}})"></button>
-  </form>
-  {%- endfor -%}
+    <button type="submit"><IMG style="cursor:pointer" src="http://image.tmdb.org/t/p/w185{{i.poster_path}}" title="{{i.title}} ({{i.release_date[:4]}})"></button>
+      </form>
+    {%- endfor -%}
+
+
 
 </center>
 {% endblock %}

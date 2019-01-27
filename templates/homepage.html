@@ -6,6 +6,7 @@
 
 {% block main %}
 <style>
+    form { display: inline-block; }
     #button {
     display:inline-block;
     /**other codes**/
@@ -13,16 +14,12 @@
 </style>
 <center><bold><h3>Populairste Nederlandse films</h3></bold></center>
 <center><hr>
-    <!-- Tabellen in JinJa; https://stackoverflow.com/questions/9198334/how-to-build-up-a-html-table-with-a-simple-for-loop-in-jinja2 -->
-    <i>
-        {%- for i in results[:12] -%}
-        <form action="/filminfo_non" method="post">
+            {%- for i in results[:12] -%}
+            <form action="/filminfo_non" method="post">
             <input type="hidden" name="tmdb_id" value="{{i.id}}"></input>
-            <button type="submit"><IMG src="http://image.tmdb.org/t/p/w185{{i.poster_path}}" title="{{i.title}} ({{i.release_date[:4]}})"></button>
-        </form>
-        {%- endfor -%}
-    </i>
+            <button type="submit"><IMG style="cursor:pointer" src="http://image.tmdb.org/t/p/w185{{i.poster_path}}" title="{{i.title}} ({{i.release_date[:4]}})"></button>
+            </form>
+            {%- endfor -%}
+
 </center>
 {% endblock %}
-
-

@@ -1,24 +1,16 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Profiel
+    Mijn profiel
 {% endblock %}
 
 {% block main %}
 <center><h2>Mijn profiel</h2></center>
-{% if length > 0 %}
-<bold style="float:right; position: relative; top:-40px">
-  <a href="/verzoeken">
-    <button type="button" class="btn btn-light">
-    Je hebt vriendschapsverzoeken <span class="badge badge-danger">{{length}}</span>
-    </button>
-  </a>
-</bold>
-{% endif %}
 <hr>
   <ul style="list-style-type:square;">
     <li><a href="/wachtwoordgebruikers">Wachtwoord wijzigen</a></li>
     <li><a href="/vriendenlijst">Mijn vrienden</a></li>
+    <li><a href="/favorieten">Mijn favorieten</a></li>
     <li>Mijn bekeken films</li>
     <li>Mijn kijklijst</li>
     <li>Mijn lijsten</li>

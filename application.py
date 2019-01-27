@@ -30,6 +30,119 @@ Session(app)
 # configure CS50 Library to use SQLite database
 db = SQL("sqlite:///nlfilms.db")
 
+def zoeken_id(tmdb_id):
+    # ophalen (per pagina)
+    from urllib.request import urlopen
+    url = "https://api.themoviedb.org/3/movie/" + tmdb_id + "?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl"
+    response = json.loads(str((requests.get(url).content).decode('UTF-8')))
+
+def gebruiker():
+    a = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
+    gebruikersnaam = a[0]["gebruikersnaam"]
+
+    return gebruikersnaam
+
+def verzoek():
+    gebruikersnaam = gebruiker()
+    verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd IS NULL",
+                            naar=gebruikersnaam)
+
+    return verzoeken
+
+def lengte_vv():
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+
+    if verzoeken:
+        lengte = len(verzoeken)
+        return lengte
+
+    else:
+        lengte = 0
+        return lengte
+
+def apology(message, code=400):
+    """Renders message as an apology to user."""
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+
+    return render_template("apology.html", top=code, bottom=message, lengte=lengte)
+
+def addtohistory(tmdb_id, tmdb_response):
+    gebruikersnaam = gebruiker()
+    historie = db.execute("SELECT film_id FROM historie WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
+
+    if len(historie) == 0:
+        db.execute("INSERT INTO historie (gebruiker, film_id, titel, afbeelding) VALUES (:gebruiker, :film_id, :titel, :afbeelding)",
+                    gebruiker=gebruikersnaam, film_id=tmdb_id, titel=tmdb_response["original_title"],
+                    afbeelding=tmdb_response["poster_path"])
+
+    if not tmdb_id in [i["film_id"] for i in historie] and len(historie) != 0:
+        db.execute("INSERT INTO historie (gebruiker, film_id, titel, afbeelding) VALUES (:gebruiker, :film_id, :titel, :afbeelding)",
+                    gebruiker=gebruikersnaam, film_id=tmdb_id, titel=tmdb_response["original_title"],
+                    afbeelding=tmdb_response["poster_path"])
+
+
+def ophalen(name):
+    opgehaald = request.form.get(name)
+    return opgehaald
+
+def ophalenmislukt(name, error):
+    opgehaald = request.form.get(name)
+
+    if not opgehaald:
+        return apology(error)
+
+def select(zoekterm, tabel, gelijke_var, variabelen):
+
+    a = "SELECT"
+    b = '("{}" '.format(a)
+    c = '{} '.format(zoekterm)
+    d = "FROM"
+    e = '{} '.format(d)
+    f = " WHERE"
+    g = '{} '.format(f)
+    h = '{}", '.format(gelijke_var)
+    i= '{})'.format(variabelen)
+    resultaat = (b+c+e+tabel+g+h+i)
+    return resultaat
+
+
+def registerform():
+    if not request.form.get("gebruikersnaam"):
+        return apology("Geef een gebruikersnaam op.")
+
+    # ensure password was submitted
+    elif not request.form.get("email"):
+        return apology("Geef een e-mailadres op.")
+
+    # ensure password was submitted
+    elif not request.form.get("wachtwoord"):
+        return apology("Geef een wachtwoord op.")
+
+    # ensure password-confirmation was submitted
+    elif not request.form.get("wachtwoord-confirmatie"):
+        return apology("Geef het wachtwoord nogmaals op.")
+
+    # ensure password equals password confirmation
+    if request.form.get("wachtwoord") != request.form.get("wachtwoord-confirmatie"):
+        return apology("De bevestiging komt niet overeen met het wachtwoord.")
+
+    # ensure the security question has been answered
+    elif not request.form.get("veiligheidsvraag"):
+        return apology("Beantwoord de veiligheidsvraag.")
+
+
+@app.route("/layout")
+@login_required
+def layout():
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+
+    return render_template("layout.html", verzoeken=verzoeken, lengte=lengte)
+
 @app.route("/index")
 @login_required
 def index():
@@ -37,19 +150,11 @@ def index():
     popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
     popular_results = popular["results"]
 
-    gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
-    gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
 
-    verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd IS NULL",
-                            naar=gebruikerzelf)
-
-    if verzoeken:
-        length = len(verzoeken)
-
-    else:
-        length = 0
-
-    return render_template("index.html", results=popular_results, length=length)
+    return render_template("index.html", results=popular_results, lengte=lengte)
 
 @app.route("/")
 def homepage():
@@ -57,8 +162,6 @@ def homepage():
     from urllib.request import urlopen
     popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
     popular_results = popular["results"]
-
-    # Vanavond op televisie
 
     return render_template("homepage.html", results=popular_results)
 
@@ -68,6 +171,12 @@ def wachtwoord():
 
 @app.route("/overons")
 def overons():
+    if session["user_id"] > 0:
+        gebruikersnaam = gebruiker()
+        verzoeken = verzoek()
+        lengte = lengte_vv()
+        return render_template("overons.html", lengte=lengte)
+
     return render_template("overons.html")
 
 @app.route("/register", methods=["GET", "POST"])
@@ -75,29 +184,7 @@ def register():
     """Register user."""
     if request.method == "POST":
 
-        # ensure username was submitted
-        if not request.form.get("gebruikersnaam"):
-            return apology("Geef een gebruikersnaam op.")
-
-        # ensure password was submitted
-        elif not request.form.get("email"):
-            return apology("Geef een e-mailadres op.")
-
-        # ensure password was submitted
-        elif not request.form.get("wachtwoord"):
-            return apology("Geef een wachtwoord op.")
-
-        # ensure password-confirmation was submitted
-        elif not request.form.get("wachtwoord-confirmatie"):
-            return apology("Geef het wachtwoord nogmaals op.")
-
-        # ensure password equals password confirmation
-        if request.form.get("wachtwoord") != request.form.get("wachtwoord-confirmatie"):
-            return apology("De bevestiging komt niet overeen met het wachtwoord.")
-
-        # ensure the security question has been answered
-        elif not request.form.get("veiligheidsvraag"):
-            return apology("Beantwoord de veiligheidsvraag.")
+        registerform()
 
         # hash the password
         wachtwoord = pwd_context.hash(request.form.get("wachtwoord"))
@@ -136,13 +223,15 @@ def login():
     # if user reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
-        # ensure form was filled
-        if not request.form.get("gebruiker-inloggen"):
-            return apology("Geef een gebruikersnaam op")
-        elif not request.form.get("wachtwoord-inloggen"):
-            return apology("Geef een wachtwoord op")
+        ophalenmislukt("gebruiker-inloggen", "Geef een gebruikersnaam op")
+        ophalenmislukt("wachtwoord-inloggen", "Geef een wachtwoord op")
 
         # query database for username
+        t = ophalen("gebruiker-inloggen")
+        x = "gebruikersnaam=" + t
+        print(x)
+        rows = select("*", "gebruikers", "gebruikersnaam=:gebruikersnaam", x)
+        print(a)
         rows = db.execute("SELECT * FROM gebruikers WHERE gebruikersnaam = :gebruikersnaam",
                           gebruikersnaam=request.form.get("gebruiker-inloggen"))
 
@@ -185,9 +274,13 @@ def logout():
 @login_required
 def vriend():
 
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+
     if request.method == "POST":
 
-        toetevoegenvriend = request.form.get("vriend")
+        toetevoegenvriend = ophalen("vriend")
 
         vriend = db.execute("SELECT * FROM gebruikers WHERE gebruikersnaam = :gebruikersnaam",
                           gebruikersnaam=toetevoegenvriend)
@@ -195,21 +288,18 @@ def vriend():
         if not vriend:
             return apology("Deze gebruikersnaam bestaat niet.")
 
-        lijst = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
-        gebruiker = lijst[0]["gebruikersnaam"]
-
         altoegevoegd = db.execute("SELECT naar FROM verzoeken WHERE naar =:naar AND van=:van AND geaccepteerd IS NULL",
-        naar=toetevoegenvriend, van=gebruiker)
+        naar=toetevoegenvriend, van=gebruikersnaam)
         tekst = "Je hebt " + toetevoegenvriend + " al toegevoegd"
 
         if altoegevoegd:
             return apology(tekst)
 
-        if toetevoegenvriend == gebruiker:
+        if toetevoegenvriend == gebruikersnaam:
             return apology("Je kan jezelf niet toevoegen")
 
         alvrienden = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
-                                van=toetevoegenvriend, naar=gebruiker, geaccepteerd="ja")
+                                van=toetevoegenvriend, naar=gebruikersnaam, geaccepteerd="ja")
 
         tekstt = "Je bent al vrienden met " + toetevoegenvriend
 
@@ -217,86 +307,73 @@ def vriend():
             return apology("Jullie zijn al vrienden")
 
         aluitgenodigd = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND uitgenodigd=:uitgenodigd",
-                                    van=toetevoegenvriend, naar=gebruiker, uitgenodigd="ja")
+                                    van=toetevoegenvriend, naar=gebruikersnaam, uitgenodigd="ja")
 
         if aluitgenodigd:
             return apology("Deze gebruiker heeft je al uitgenodigd")
 
         nogeenkeeruitnodigen = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
-                                           van=toetevoegenvriend, naar=gebruiker, geaccepteerd="nee")
+                                           van=toetevoegenvriend, naar=gebruikersnaam, geaccepteerd="nee")
         if nogeenkeeruitnodigen:
             db.execute("UPDATE verzoeken (van, naar, geaccepteerd) VALUES (:van, :naar, :geaccepteerd)",
-                        van=gebruiker, naar=toetevoegenvriend, geaccepteerd="NULL")
+                        van=gebruikersnaam, naar=toetevoegenvriend, geaccepteerd="NULL")
 
         else:
 
             db.execute("INSERT INTO verzoeken (van, naar, uitgenodigd) VALUES (:van, :naar, :uitgenodigd)",
-                        van=gebruiker, naar=toetevoegenvriend, uitgenodigd="ja")
+                        van=gebruikersnaam, naar=toetevoegenvriend, uitgenodigd="ja")
 
-            return render_template("toegevoegd.html", toetevoegenvriend=toetevoegenvriend)
+            return render_template("toegevoegd.html", toetevoegenvriend=toetevoegenvriend, lengte=lengte)
 
-    return render_template("vriendtoevoegen.html")
+    return render_template("vriendtoevoegen.html", lengte=lengte)
 
 @app.route("/toegevoegd", methods=["GET", "POST"])
 @login_required
 def toegevoegd():
-    return render_template("toegevoegd.html")
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+
+    return render_template("toegevoegd.html", lengte=lengte)
 
 @app.route("/vriendenlijst")
 @login_required
 def vriendenlijst():
 
-    lijst = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
-    gebruiker = lijst[0]["gebruikersnaam"]
-
+    gebruikersnaam = gebruiker()
     vrienden = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd",
-                           naar=gebruiker, geaccepteerd="ja")
+                           naar=gebruikersnaam, geaccepteerd="ja")
+    verzoeken = verzoek()
+    lengte = lengte_vv()
 
-    gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
-    gebruikerzelf = gebruiker[0]["gebruikersnaam"]
-
-    verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd IS NULL",
-                            naar=gebruikerzelf)
-
-    if verzoeken:
-        length = len(verzoeken)
-
-    else:
-        length = 0
-
-    return render_template("vriendenlijst.html", vrienden=vrienden, length=length)
+    return render_template("vriendenlijst.html", vrienden=vrienden, lengte=lengte)
 
 @app.route("/verzoeken", methods=["GET", "POST"])
 @login_required
 def verzoeken():
 
-    gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
-    gebruikerzelf = gebruiker[0]["gebruikersnaam"]
-
-    verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd IS NULL",
-                            naar=gebruikerzelf)
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
 
     if request.method == "POST":
         accepteren = request.form.get("accepteren")
         weigerenn = request.form.get("weigeren")
 
-        gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
-        gebruikerzelf = gebruiker[0]["gebruikersnaam"]
-
         if not accepteren:
             weigeren = weigerenn[1:]
             db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd WHERE van=:van AND naar=:naar", geaccepteerd="nee",
-                        van=weigeren, naar=gebruikerzelf)
+                        van=weigeren, naar=gebruikersnaam)
 
             return redirect("/verzoeken")
 
         else:
             db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd WHERE van=:van AND naar=:naar", geaccepteerd="ja",
-                        van=accepteren, naar=gebruikerzelf)
+                        van=accepteren, naar=gebruikersnaam)
 
             return redirect("/verzoeken")
 
-    return render_template("verzoeken.html", verzoeken=verzoeken)
+    return render_template("verzoeken.html", verzoeken=verzoeken, lengte=lengte)
 
 # ZOEKEN
 '''
@@ -337,45 +414,32 @@ def zoekresultaat():
             while x < 30:
                 zoekresultaten += zoeken(zoekterm, x)["results"]
                 x += 1
-            return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten)
 
-        else: return apology("Iets ging mis")
+            if session["user_id"] > 0:
+                gebruikersnaam = gebruiker()
+                verzoeken = verzoek()
+                lengte = lengte_vv()
+                return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten, lengte=lengte)
 
-# Onderstaande ding is backup voor def zoekresultaat():
-'''
-    if request.method == "POST":
-        zoekterm = request.form.get("zoekterm")
-        if not zoekterm:
-            return apology("Geen zoekterm")
-        elif zoeken(zoekterm, 1) != False:
-            zoekresultaten = zoeken(zoekterm, 1)
-            return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten)
-'''
+            else:
+                return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten)
 
-
-        ##als het nederlands is
-        #"original_language":"nl"
- #       if not stockinfo:
- #           return apology("Stock is not valid")
- #       return render_template("stockprice.html", aandeel=stockinfo)
- #   else:
- #       return render_template("quote.html")
-
-    # zoekresultaat TMDb id naar IMDb id (als OMDb input)
-   # "https://api.themoviedb.org/3/movie/569050?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl"
+        else:
+            return apology("Iets ging mis")
 
 @app.route("/filminfo", methods=["GET", "POST"])
 @login_required
 def filminformatie():
 
     if request.method == "POST":
-
         tmdb_id = request.form.get("tmdb_id")
 
         # Alle informatie ophalen voor zoekresultaat (TMDb)
         from urllib.request import urlopen
         tmdb_url = str("https://api.themoviedb.org/3/movie/" + tmdb_id + "?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl")
         tmdb_response = json.loads(str((requests.get(tmdb_url).content).decode('UTF-8')))
+
+        addtohistory(tmdb_id, tmdb_response)
 
         # Als er geen IMDb id genoemd wordt
         if tmdb_response["imdb_id"] == None or "tt" not in tmdb_response["imdb_id"]:
@@ -386,13 +450,14 @@ def filminformatie():
             omdb_url = "http://www.omdbapi.com/?i=" + tmdb_response["imdb_id"] + "&apikey=be77e5d"
             omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
 
-        gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
-        gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+        gebruikersnaam = gebruiker()
+        verzoeken = verzoek()
+        lengte = lengte_vv()
 
-        favorieten = db.execute("SELECT film_id FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikerzelf)
+        favorieten = db.execute("SELECT film_id FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
         alfavo = any([favoriet['film_id'] == tmdb_id for favoriet in favorieten])
 
-        return render_template("filminformatie.html", tmdb=tmdb_response, omdb=omdb_response, alfavo=alfavo)
+        return render_template("filminformatie.html", tmdb=tmdb_response, omdb=omdb_response, alfavo=alfavo, lengte=lengte)
 
 @app.route("/filminfo_non", methods=["GET", "POST"])
 def filminformatie_non():
@@ -422,19 +487,11 @@ def filminformatie_non():
 def mijnprofiel():
     "Pas je profiel aan"
 
-    gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
-    gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
 
-    verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd IS NULL",
-                            naar=gebruikerzelf)
-
-    if verzoeken:
-        length = len(verzoeken)
-
-    else:
-        length = 0
-
-    return render_template("mijnprofiel.html", length=length)
+    return render_template("mijnprofiel.html", lengte=lengte)
 
 @app.route("/wachtwoordvergeten", methods=["GET", "POST"])
 def wachtwoordvergeten():
@@ -451,9 +508,6 @@ def wachtwoordveranderen():
 
         if not request.form.get('gebruikersnaam'):
             return apology("Vul je gebruikersnaam in")
-
-        if not request.form.get('wachtwoord'):
-            return apology("Vul je huidige wachtwoord in")
 
         # pak id uit database
         account = db.execute("SELECT * FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam",
@@ -506,8 +560,13 @@ def wachtwoordveranderen():
         return render_template("wachtwoordveranderen.html")
 
 @app.route("/wachtwoordgebruikers", methods=["GET", "POST"])
+@login_required
 def wachtwoordgebruikers():
     """Verander wachtwoord"""
+
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
 
     if request.method == 'POST':
 
@@ -545,27 +604,40 @@ def wachtwoordgebruikers():
         # new_hash = CryptContext.hash(niet_hash)
 
         # update de gebruiker
-        resultaat = db.execute("UPDATE gebruikers SET wachtwoord=:wachtwoord WHERE id=:id", id=session["user_id"], wachtwoord=new_hash)
+        resultaat = db.execute("UPDATE gebruikers SET wachtwoord=:wachtwoord WHERE id=:id",
+                                id=session["user_id"], wachtwoord=new_hash)
 
         if not resultaat:
             return apology("Iets ging fout...")
 
-        return render_template("wachtwoordveranderd.html")
+        return render_template("wachtwoordveranderd.html", lengte=lengte)
 
     else:
-        return render_template("wachtwoordgebruikers.html")
+        return render_template("wachtwoordgebruikers.html", lengte=lengte)
 
 @app.route("/wachtwoordveranderd")
 def wachtwoordveranderd():
+    if session["user_id"] > 0:
+        gebruikersnaam = gebruiker()
+        verzoeken = verzoek()
+        lengte = lengte_vv()
+
+        return render_template("wachtwoordveranderd.html", lengte=lengte)
+
     return render_template("wachtwoordveranderd.html")
+
 
 @app.route("/accountverwijderen", methods=["GET", "POST"])
 @login_required
 def accountverwijderen():
+
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+
     if request.method == "POST":
 
-        gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
-        gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+        gebruikersnaam = gebruiker()
 
         wachtwoord = request.form.get("wachtwoord")
         print(wachtwoord)
@@ -581,7 +653,7 @@ def accountverwijderen():
             return apology("De bevestiging komt niet overeen met het wachtwoord.")
 
         wachtwoordcheck = db.execute("SELECT wachtwoord FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam",
-                                      gebruikersnaam=gebruikerzelf)
+                                      gebruikersnaam=gebruikersnaam)
 
         if len(wachtwoordcheck) != 1 or not pwd_context.verify(request.form.get("wachtwoord"), wachtwoordcheck[0]["wachtwoord"]):
             return apology("Het opgegeven wachtwoord klopt niet")
@@ -589,32 +661,36 @@ def accountverwijderen():
         else:
             session.clear()
 
-            db.execute("DELETE FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam", gebruikersnaam=gebruikerzelf)
-            db.execute("DELETE FROM verzoeken WHERE naar=:naar OR van=:van", naar=gebruikerzelf, van=gebruikerzelf)
+            db.execute("DELETE FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam", gebruikersnaam=gebruikersnaam)
+            db.execute("DELETE FROM verzoeken WHERE naar=:naar OR van=:van", naar=gebruikersnaam, van=gebruikersnaam)
 
-            return render_template("verwijderd.html", gebruikerzelf=gebruikerzelf)
+            return render_template("verwijderd.html", gebruikersnaam=gebruikersnaam, lengte=lengte)
 
-    return render_template("accountverwijderen.html")
+    return render_template("accountverwijderen.html", lengte=lengte)
 
 @app.route("/favorieten", methods=["GET", "POST"])
 @login_required
 def favorieten():
 
-    gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
-    gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
 
-    favorieten = db.execute("SELECT titel FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikerzelf)
+    favorieten = db.execute("SELECT * FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
 
-    return render_template("favorieten.html", favorieten=favorieten)
+    return render_template("favorieten.html", favorieten=favorieten, lengte=lengte)
 
 @app.route("/addfavorite", methods=["POST"])
 @login_required
 def addfavorite():
 
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+
     if request.method == "POST":
 
-        gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
-        gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+        gebruikersnaam = gebruiker()
 
         tmdb_id = request.form.get("favorieten")
 
@@ -632,21 +708,24 @@ def addfavorite():
             omdb_url = "http://www.omdbapi.com/?i=" + tmdb_response["imdb_id"] + "&apikey=be77e5d"
             omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
 
-        favorieten = db.execute("SELECT film_id FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikerzelf)
+        favorieten = db.execute("SELECT film_id FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
 
-        db.execute("INSERT INTO favorieten (gebruiker, film_id, titel) VALUES (:gebruiker, :film_id, :titel)",
-                    gebruiker=gebruikerzelf, film_id=tmdb_id, titel=tmdb_response["original_title"])
+        db.execute("INSERT INTO favorieten (gebruiker, film_id, titel, afbeelding) VALUES (:gebruiker, :film_id, :titel, :afbeelding)",
+                    gebruiker=gebruikersnaam, film_id=tmdb_id, titel=tmdb_response["original_title"], afbeelding=tmdb_response["poster_path"])
 
-        return render_template("addfavorite.html", tmdb=tmdb_response, omdb=omdb_response, favorieten=favorieten)
+        return render_template("addfavorite.html", tmdb=tmdb_response, omdb=omdb_response, favorieten=favorieten, lengte=lengte)
 
 @app.route("/removefavorite", methods=["POST"])
 @login_required
 def removefavorite():
 
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+
     if request.method == "POST":
 
-        gebruiker = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE id=:id", id=session["user_id"])
-        gebruikerzelf = gebruiker[0]["gebruikersnaam"]
+        gebruikersnaam = gebruiker()
 
         tmdb_id = request.form.get("geenfavo")
 
@@ -665,6 +744,33 @@ def removefavorite():
             omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
 
         db.execute("DELETE FROM favorieten WHERE gebruiker=:gebruiker AND film_id=:film_id",
-                    gebruiker=gebruikerzelf, film_id=tmdb_id)
+                    gebruiker=gebruikersnaam, film_id=tmdb_id)
 
-        return render_template("removefavorite.html", tmdb=tmdb_response, omdb=omdb_response)
+        return render_template("removefavorite.html", tmdb=tmdb_response, omdb=omdb_response, lengte=lengte)
+
+@app.route("/historie", methods=["GET", "POST"])
+@login_required
+def historie():
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+
+    historie = db.execute("SELECT * FROM historie WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
+
+    if request.method == "POST":
+        if len(historie) > 0:
+            db.execute("DELETE FROM historie WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
+            return render_template("legehistorie.html", historie=historie, lengte=lengte)
+        else:
+            return apology("Je hebt geen kijkgeschiedenis")
+
+    return render_template("historie.html", historie=historie, lengte=lengte)
+
+@app.route("/legehistorie", methods=["GET", "POST"])
+@login_required
+def legehistorie():
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+
+    return render_template("legehistorie.html", lengte=lengte)
