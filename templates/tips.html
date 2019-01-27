@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Mijn tips
+{% endblock %}
+
+{% block main %}
+<style>
+.favoriet {
+  border: none;
+  background-color: inherit;
+  padding: 14px 28px;
+  font-size: 16px;
+  cursor: pointer;
+  display: inline-block;
+}
+.favoriet:hover {background: #eee;}
+.success {color: green;}
+.info {color: dodgerblue;}
+.warning {color: orange;}
+.danger {color: red;}
+.standaard {color: black;}
+grid {
+  display: grid;
+}
+</style>
+
+<center><h2>Mijn tips</h2></center>
+<hr>
+
+<div class="grid">
+  {% for tip in aanbevelingen %}
+  <button class="favoriet standaard" text-align="center" style="width:300px;" name="#" value="#" type="submit">{{tip.titel}}<img src="http://image.tmdb.org/t/p/w45{{tip.afbeelding}}"></img><p></p></button>
+  {% endfor %}
+</div>
+{% endblock %}

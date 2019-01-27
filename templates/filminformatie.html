@@ -58,6 +58,35 @@
             </div>
           </div>
         </form>
+        <form action="/tipvriend" method="post">
+          <p align="center">
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Tip een vriend
+              </button>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <form class="dropdown-menu p-4">
+                  <div class="form-group">
+                    <center>
+                      <label for="exampleDropdownFormPassword2"><b>Gebruikersnaam</b></label>
+                      <input type="text" class="form-control" name="tipvriend" placeholder="Gebruikersnaam">
+                    </center>
+                  </div>
+                  <center>
+                    <button type="submit" class="btn btn-primary" name="buttonvriend" value="{{tmdb.id}}" >Tip vriend!</button>
+                  </center>
+                </form>
+              </div>
+            </div>
+
+
+            <!--    {% for vriend in vrienden %}-->
+            <!--    <a class="dropdown-item" type="submit">{{vriend.van}}</a>-->
+            <!--    {% endfor %}-->
+            <!--  </div>-->
+            <!--</div>-->
+          </p>
+        </form>
       </p>
     </div>
       <div id="rechterkolom">

@@ -44,8 +44,8 @@ def gebruiker():
 
 def verzoek():
     gebruikersnaam = gebruiker()
-    verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd IS NULL",
-                            naar=gebruikersnaam)
+    verzoeken = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd AND uitgenodigd=:uitgenodigd AND afgewezen=:afgewezen",
+                            naar=gebruikersnaam, geaccepteerd="nee", uitgenodigd="ja", afgewezen="nee")
 
     return verzoeken
 
@@ -286,40 +286,49 @@ def vriend():
         if not vriend:
             return apology("Deze gebruikersnaam bestaat niet.")
 
-        altoegevoegd = db.execute("SELECT naar FROM verzoeken WHERE naar =:naar AND van=:van AND geaccepteerd IS NULL",
-        naar=toetevoegenvriend, van=gebruikersnaam)
-        tekst = "Je hebt " + toetevoegenvriend + " al toegevoegd"
-
-        if altoegevoegd:
-            return apology(tekst)
-
         if toetevoegenvriend == gebruikersnaam:
             return apology("Je kan jezelf niet toevoegen")
 
         alvrienden = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
                                 van=toetevoegenvriend, naar=gebruikersnaam, geaccepteerd="ja")
 
+        alvriendenn = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
+                                naar=toetevoegenvriend, van=gebruikersnaam, geaccepteerd="ja")
+
         tekstt = "Je bent al vrienden met " + toetevoegenvriend
 
-        if alvrienden:
-            return apology("Jullie zijn al vrienden")
+        if alvrienden or alvriendenn:
+            return apology(tekstt)
 
-        aluitgenodigd = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND uitgenodigd=:uitgenodigd",
-                                    van=toetevoegenvriend, naar=gebruikersnaam, uitgenodigd="ja")
+        aluitgenodigdvriend = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND uitgenodigd=:uitgenodigd AND geaccepteerd=:geaccepteerd AND afgewezen=:afgewezen",
+                                          van=toetevoegenvriend, naar=gebruikersnaam, uitgenodigd="ja", geaccepteerd="nee", afgewezen="nee")
 
-        if aluitgenodigd:
-            return apology("Deze gebruiker heeft je al uitgenodigd")
+        aluitgenodigdjij = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND uitgenodigd=:uitgenodigd AND geaccepteerd=:geaccepteerd AND afgewezen=:afgewezen",
+                                       van=gebruikersnaam, naar=toetevoegenvriend, uitgenodigd="ja", geaccepteerd="nee", afgewezen="nee")
 
-        nogeenkeeruitnodigen = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
-                                           van=toetevoegenvriend, naar=gebruikersnaam, geaccepteerd="nee")
+        if aluitgenodigdvriend or aluitgenodigdjij:
+            return apology("Deze gebruiker heeft je al uitgenodigd of andersom")
+
+        nogeenkeeruitnodigenjij = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND uitgenodigd=:uitgenodigd \
+                                          AND geaccepteerd=:geaccepteerd AND afgewezen=:afgewezen",
+                                          van=gebruikersnaam, naar=toetevoegenvriend, uitgenodigd="ja", geaccepteerd="nee", afgewezen="ja")
+
+        nogeenkeeruitnodigen = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND uitgenodigd=:uitgenodigd \
+                                          AND geaccepteerd=:geaccepteerd AND afgewezen=:afgewezen",
+                                          naar=gebruikersnaam, van=toetevoegenvriend, uitgenodigd="ja", geaccepteerd="nee", afgewezen="ja")
+
+        if nogeenkeeruitnodigenjij:
+            db.execute("UPDATE verzoeken SET afgewezen=:afgewezen WHERE van=:van AND naar=:naar",
+                        van=toetevoegenvriend, naar=gebruikersnaam, afgewezen="nee")
+
         if nogeenkeeruitnodigen:
-            db.execute("UPDATE verzoeken (van, naar, geaccepteerd) VALUES (:van, :naar, :geaccepteerd)",
-                        van=gebruikersnaam, naar=toetevoegenvriend, geaccepteerd="NULL")
+            db.execute("UPDATE verzoeken SET afgewezen=:afgewezen WHERE van=:van AND naar=:naar",
+                        van=toetevoegenvriend, naar=gebruikersnaam, afgewezen="nee")
 
         else:
 
-            db.execute("INSERT INTO verzoeken (van, naar, uitgenodigd) VALUES (:van, :naar, :uitgenodigd)",
-                        van=gebruikersnaam, naar=toetevoegenvriend, uitgenodigd="ja")
+            db.execute("INSERT INTO verzoeken (van, naar, geaccepteerd, uitgenodigd, afgewezen) VALUES (:van, :naar, :geaccepteerd, :uitgenodigd, :afgewezen)",
+                        van=gebruikersnaam, naar=toetevoegenvriend, geaccepteerd="nee", uitgenodigd="ja", afgewezen="nee")
 
             return render_template("toegevoegd.html", toetevoegenvriend=toetevoegenvriend, lengte=lengte)
 
@@ -360,8 +369,8 @@ def verzoeken():
 
         if not accepteren:
             weigeren = weigerenn[1:]
-            db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd WHERE van=:van AND naar=:naar", geaccepteerd="nee",
-                        van=weigeren, naar=gebruikersnaam)
+            db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd AND afgewezen=:afgewezen WHERE van=:van AND naar=:naar",
+                        geaccepteerd="nee", afgewezen="ja", van=weigeren, naar=gebruikersnaam)
 
             return redirect("/verzoeken")
 
@@ -414,15 +423,7 @@ def zoekresultaat():
                 zoekresultaten += zoeken(zoekterm, x)["results"]
                 x += 1
 
-            if not session["user_id"]:
-                return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten)
-
-            else:
-                gebruikersnaam = gebruiker()
-                verzoeken = verzoek()
-                lengte = lengte_vv()
-
-                return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten, lengte=lengte)
+            return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten, lengte=lengte)
 
         else:
             return apology("Iets ging mis")
@@ -476,10 +477,13 @@ def filminformatie():
         verzoeken = verzoek()
         lengte = lengte_vv()
 
+        vrienden = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd",
+                           naar=gebruikersnaam, geaccepteerd="ja")
+
         favorieten = db.execute("SELECT film_id FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
         alfavo = any([favoriet['film_id'] == tmdb_id for favoriet in favorieten])
 
-        return render_template("filminformatie.html", tmdb=tmdb_response, omdb=omdb_response, alfavo=alfavo, lengte=lengte)
+        return render_template("filminformatie.html", tmdb=tmdb_response, omdb=omdb_response, alfavo=alfavo, lengte=lengte, vrienden=vrienden)
 
 @app.route("/filminfo_non", methods=["GET", "POST"])
 def filminformatie_non():
@@ -823,3 +827,61 @@ def checkins():
     lengte = lengte_vv()
 
     return render_template("checkins.html", lengte=lengte)
+
+@app.route("/tipvriend", methods=["POST"])
+@login_required
+def tipvriend():
+
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+
+    from urllib.request import urlopen
+    popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
+    popular_results = popular["results"]
+
+    if request.method == "POST":
+
+        vriend = ophalen("tipvriend")
+        tmdb_id = ophalen("buttonvriend")
+
+        # Alle informatie ophalen voor zoekresultaat (TMDb)
+        from urllib.request import urlopen
+        tmdb_url = str( "https://api.themoviedb.org/3/movie/" + tmdb_id + "?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl")
+        tmdb_response = json.loads(str((requests.get(tmdb_url).content).decode('UTF-8')))
+
+        # Als er geen IMDb id genoemd wordt
+        if tmdb_response["imdb_id"] == None or "tt" not in tmdb_response["imdb_id"]:
+            omdb_response = None
+
+        # Alle informatie ophalen voor zoekresultaat (OMDb)
+        else:
+            omdb_url = "http://www.omdbapi.com/?i=" + tmdb_response["imdb_id"] + "&apikey=be77e5d"
+            omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
+
+        check = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
+                            van=gebruikersnaam, naar=vriend, geaccepteerd="ja")
+
+        check2 = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
+                            naar=gebruikersnaam, van=vriend, geaccepteerd="ja")
+
+        if check or check2:
+            tips = db.execute("INSERT INTO aanbevelingen (van, naar, film_id, titel, afbeelding) VALUES (:van, :naar, :film_id, :titel, :afbeelding)",
+                        van=gebruikersnaam, naar=vriend, film_id=tmdb_id, titel=tmdb_response["original_title"], afbeelding=tmdb_response["poster_path"])
+
+            aanbevelingen = db.execute("SELECT * FROM aanbevelingen WHERE van=:van", van=gebruikersnaam)
+            return render_template("tips.html", tmdb=tmdb_response, omdb=omdb_response, favorieten=favorieten, lengte=lengte, aanbevelingen=aanbevelingen)
+
+        else:
+            return apology("Deze gebruiker is geen vriend van je")
+
+        return redirect(url_for("index"))
+
+@app.route("/tips", methods=["GET", "POST"])
+@login_required
+def tips():
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+    aanbevelingen = db.execute("SELECT * FROM aanbevelingen WHERE van=:van", van=gebruikersnaam)
+    return render_template("tips.html", lengte=lengte, aanbevelingen=aanbevelingen)
