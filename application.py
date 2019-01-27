@@ -205,14 +205,18 @@ def vriendenlijst():
 @app.route("/profiel")
 @login_required
 def profiel():
-    "Pas je profiel aan"
+    """
+    Pas je profiel aan
+    """
     return render_template("profiel.html")
 
 
 @app.route("/wachtwoordveranderen", methods=["GET", "POST"])
 @login_required
 def wachtwoordveranderen():
-    """Verander wachtwoord"""
+    """
+    Verander wachtwoord
+    """
 
     if request.method == 'POST':
 
@@ -283,3 +287,59 @@ def zoekresultaat():
 
     # zoekresultaat TMDb id naar IMDb id (als OMDb input)
     "https://api.themoviedb.org/3/movie/569050?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl"
+
+@app.route("/wachtwoordvegeten", methods=["GET", "POST"])
+def wachtwoordvergeten():
+    """
+    Het formulier dat ingevuld moet worden om je wachtwoord te resetten als je deze bent vergeten
+    """
+
+    if request.method == "POST":
+
+        # neem de ingevulde gebruikersnaam
+        username = request.form.get('gebruikersnaam')
+
+        # controleer of de naam in de database staat
+        naamcheck = db.execute("SELECT gebruikersnaam FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam", gebruikersnaam=username)
+
+        # bevestig of de gebruikersnaam klopt
+        if not naamcheck:
+            return apology("Deze naam komt niet in de database voor")
+
+        # pak id uit database
+        account = db.execute("SELECT * FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam", gebruikersnaam=username)
+
+        # check of een nieuw wachtwoord is ingevuld
+        if not request.form.get("nieuw_wachtwoord"):
+            return apology("Vul een nieuw wachtwoord in")
+
+        # check of het nieuwe wachtwoord is herhaald
+        if not request.form.get("wachtwoord_herhaling"):
+            return apology("Herhaal je nieuwe wachtwoord")
+
+        # controleer of beide wachtwoorden overeenkomen
+        if request.form.get("nieuw_wachtwoord") != request.form.get("wachtwoord_herhaling"):
+            return apology("De wachtwoorden komen niet overeen")
+
+        # beantwoord de veiligheidsvraag
+        if not request.form.get('veiligheidsvraag'):
+            return apology("Beantwoord de veiligheidsvraag.")
+
+        # bevestig of het antwoord klopt
+        if request.form.get('veiligheidsvraag') != account[0]['veiligheidsvraag']:
+            return apology("Het antwoord op de veiligheidsvraag klopt niet!")
+
+        # maak een hash van het wachtwoord
+        niet_hash = request.form.get("nieuw_wachtwoord")
+        new_hash = CryptContext.hash(niet_hash)
+
+        # update de gebruiker
+        resultaat = db.execute("UPDATE gebruikers SET wachtwoord=:wachtwoord WHERE gebruikersnaam=:gebruikersnaam", gebruikersnaam=username, wachtwoord=new_hash)
+
+        if not resultaat:
+            return apology("Iets ging fout...")
+
+        return redirect(url_for("homepage"))
+
+    else:
+        return render_template("wachtwoordvergeten.html")

@@ -1,29 +1,30 @@
-{% extends "layout.html" %}
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-{% block title %}
-    Wachtwoord Veranderen
-{% endblock %}
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
-{% block main %}
-    <form action="{{ url_for('wachtwoordveranderen') }}" method="post">
-        <fieldset>
-            <div class="form-group">
-                <input autocomplete="off" autofoucus class="form-control" name="wachtwoord" placeholder="Huidig Wachtwoord" type="text"/>
-            </div>
-            <div class="form-group">
-                <input class="form-control" name="nieuw_wachtwoord" placeholder="Nieuw Wachtwoord" type="password"/>
-            </div>
-            <div class="form-group">
-                <input class="form-control" name="wachtwoord_herhaling" placeholder="Herhaal Nieuw Wachtwoord" type="password"/>
-            </div>
-            <div class="form-group">
-                <input class="form-control" name="veiligheidsvraag" placeholder="Veiligheidsvraag: In welke stad staat jou favoriete bioscoop?" type="text"/>
-            </div>
-            <div class="form-group">
-                <button class="btn btn-default" type="submit">Pas Toe</button>
-            </div>
-        </fieldset>
-    </form>
+    {%block head %} {% endblock %}
+
+    {% block title %}
+        Wachtwoord Veranderen
+    {% endblock %}
+  </head>
+  <style>
+    img {
+    float: left;
+  }
+  .tekst {
+    text-align: left;
+  }
+  </style>
+<body>
+
+
 
 {% if session.user_id %}
 <!-- Optional JavaScript -->
@@ -91,5 +92,27 @@
     </nav>
 
 {% endif %}
+{% block main %}
+    <form action="{{ url_for('wachtwoordveranderen') }}" method="post">
+        <fieldset>
+            <div class="form-group">
+                <input autocomplete="off" autofoucus class="form-control" name="wachtwoord" placeholder="Huidig Wachtwoord" type="text"/>
+            </div>
+            <div class="form-group">
+                <input class="form-control" name="nieuw_wachtwoord" placeholder="Nieuw Wachtwoord" type="password"/>
+            </div>
+            <div class="form-group">
+                <input class="form-control" name="wachtwoord_herhaling" placeholder="Herhaal Nieuw Wachtwoord" type="password"/>
+            </div>
+            <div class="form-group">
+                <input class="form-control" name="veiligheidsvraag" placeholder="Veiligheidsvraag: In welke stad staat jou favoriete bioscoop?" type="text"/>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-default" type="submit">Pas Toe</button>
+            </div>
+        </fieldset>
+    </form>
+
+
 {% endblock %}
     </center>
