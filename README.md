@@ -77,7 +77,7 @@ Nederlandse (NL) Films heeft als streven liefhebbers van Nederlandse film gemakk
 Zelf filminformatie en beoordelingen verzamelen. 
 
 ### Minimum viable product:
-  * Er moet gezocht kunnen worden naar een specifieke film. Wanneer de film gevonden wordt, omvat de getoonde pagina in ieder geval:
+Er moet gezocht kunnen worden naar een specifieke film. Wanneer de film gevonden wordt, omvat de getoonde pagina in ieder geval:
     * titel van de film
     * jaar van uitkomst
     * regisseur(s)
