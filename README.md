@@ -7,8 +7,11 @@
 Bekijk de concepten/schetsen op Google Slides^.
 
 ## Samenvatting:
+Nederlandse (NL) Films heeft als streven liefhebbers van Nederlandse film gemakkelijk films te laten zoeken en delen. Gebruikers kunnen films toevoegen aan bepaalde lijsten. Daarnaast is het mogelijk andere gebruikers toe te voegen als vriend en hun likes te bekijken. 
 
-  * Met NederlandseFilms.nl willen wij een site maken die gebruikers de optie geeft om hun favoriete Nederlandse films op te zoeken. Verder kunnen gebruikers kijklijsten creëren en vrienden maken met andere gebruikers, om vervolgens lijsten met elkaar te delen. Gebruikers kunnen ook likes geven aan films en comments achterlaten.
+## Disclaimer:
+* In de zoekresultaten kunnen per ongeluk ook niet Nederlandse films getoond worden. Omdat The Movie Database userdriven is, is niet alle data gecontroleerd en kan een film dus ook ten onrechte als Nederlands zijn bestempeld. Ook kan het voorkomen dat een Belgische film in de resultaten verschijnt vanwege de taal: Nederlands.
+* Bevriende gebruikers kunnen ook uw favorietenlijst bekijken (en vice versa)
 
 ## Features
 
