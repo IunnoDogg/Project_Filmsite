@@ -72,9 +72,9 @@ Nederlandse (NL) Films heeft als streven liefhebbers van Nederlandse film gemakk
 
 ---
 
-Van tevoren bepaald:
-# Wat we niet doen:
-  * Zelf filminformatie en beoordelingen verzamelen. 
+## Van tevoren vastgelegd:
+### Wat we niet doen:
+Zelf filminformatie en beoordelingen verzamelen. 
 
 ### Minimum viable product:
   * Er moet gezocht kunnen worden naar een specifieke film. Wanneer de film gevonden wordt, omvat de getoonde pagina in ieder geval:
