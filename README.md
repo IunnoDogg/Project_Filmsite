@@ -85,38 +85,24 @@ Van tevoren bepaald:
 --- 
 
 ### Afhankelijkheden
-#### Eventueel te gebruiken API’s:
+#### Gebruikte diensten
 
 | Service        | Wat           | 
 | ------------- |:-------------:| 
-| [The Movie Database](https://www.themoviedb.org/documentation/api) (TMDb)     | API  |
-| col 2 is      | centered      |
-| zebra stripes | are neat      | 
+| [The Movie Database](https://www.themoviedb.org/documentation/api) (TMDb)     | film database  API  |
+| [The Open Movie Database](http://www.omdbapi.com) (OMDb)      | film database API      |
+| [Bootstrap](https://getbootstrap.com/docs/4.2/getting-started/introduction/) | a HTML, CSS, and JS library      | 
+| [Bootsnipp](https://bootsnipp.com/) | code snippets for Bootstrap HTML/CSS/JS framework      | 
 
-
-Filmtotaal:
-http://api.filmtotaal.nl/
-
-IMDb Scraper (Third party):
-http://imdbpy.sourceforge.net/
-
-TMDb Wrapper (Third party):
-https://pypi.org/project/tmdbsimple/
-https://github.com/celiao/tmdbsimple
-
-#### Verdere sites en plug-ins:
-
-Bootstrap:
-https://getbootstrap.com/docs/4.2/getting-started/introduction/
-
-Bootsnipp:
-https://bootsnipp.com/
 
 #### Concurerende sites:
+|         | NL Films           | Filmvandaag           | TMDb           | IMDb           |  
+| ------------- |:-------------:|:-------------:| 
+| Internationale films | ☒ | ☑ | ☑ | ☒  
 
 https://www.imdb.com:
  * Niet gelimiteerd tot Nederlandse films, maar heeft ze wel.
- * Bindingen met bedrijven als Amazon
+ * Commercieel en gebonden aan een groot, beursgenoteerd bedrijf (Amazon).
  * Heeft pagina's met nieuws over de filmindustrie.
  * Behandelt ook Video Games
 
