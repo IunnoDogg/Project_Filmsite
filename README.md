@@ -68,6 +68,7 @@ Bekijk de concepten/schetsen op Google Slides^.
   * Per categorie: de beste films.
 
 ---
+
 Van tevoren bepaald:
 # Wat we niet doen:
   * Eigen ratings, beoordelingen et cetera, omdat IMDb en TMDb hierin niet te overtreffen zijn in het aantal relevante beoordelingen.
@@ -88,7 +89,7 @@ Van tevoren bepaald:
 #### Gebruikte diensten
 
 | Service        | Wat           | 
-| ------------- |:-------------:| 
+| ------------- |:-------------| 
 | [The Movie Database](https://www.themoviedb.org/documentation/api) (TMDb)     | Film database  API  |
 | [The Open Movie Database](http://www.omdbapi.com) (OMDb)      | Film database API      |
 | [Bootstrap](https://getbootstrap.com/docs/4.2/getting-started/introduction/) | A HTML, CSS, and JS library      | 
@@ -112,6 +113,7 @@ Van tevoren bepaald:
 | Trivia vragen | ☒ | ☒ | ☒ | ☑ |
 | In de bioscoop | ☒ | ☑ | ☑ | ☑ |
 | Vergelijkbare films | ☒ | ☒ | ☑ | ☑ |
+| Informatie uit eigen database | ☒ | ☒ | ☑ | ☑ |
 
 https://www.imdb.com
  * Commercieel en gebonden aan een groot, beursgenoteerd bedrijf (Amazon).
