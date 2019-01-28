@@ -1,99 +1,168 @@
-<!DOCTYPE html>
+{% extends "layout.html" %}
 
-<html lang="en">
-    <head>
-        <!-- https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta -->
-        <meta charset="utf-8"/>
-        <meta content="initial-scale=1, width=device-width" name="viewport"/>
+{% block title %}
+    Registreren
+{% endblock %}
 
-        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+{% block main %}
+<style>
+/* The message box is shown when the user clicks on the password field */
+#bericht {
+  display:none;
+  background: white;
+  color: #000;
+  position: relative;
+}
 
-        <title>NL Film | Registreren</title>
-    </head>
+#bericht p {
+  font-size: 11px;
+}
 
-    <body>
+/* Add a green text color and a checkmark when the requirements are right */
+.valid {
+  color: green;
+}
 
-        <!-- Optional JavaScript -->
-        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+.valid:before {
+  position: relative;
+  left: -35px;
+  content: "✔";
+}
 
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="{{ url_for('homepage') }}">Nederlandse film</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+/* Add a red text color and an "x" when the requirements are wrong */
+.invalid {
+  color: red;
+}
 
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('login') }}">Inloggen<span class="sr-only">(current)</span></a>
-                    </li>
+.invalid:before {
+  position: relative;
+  left: -35px;
+  content: "✖";
+}
+</style>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('overons') }}">Over ons</a>
-                    </li>
-                </ul>
-                <form class="form-inline my-2 my-lg-0">
-                    <input class="form-control mr-sm-2" type="search" placeholder="Zoek" aria-label="Search">
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Zoek</button>
-                </form>
-            </div>
-        </nav>
 <form action="{{ url_for('register') }}" method="post">
-            <div class="container">
-                <div id="loginbox" style="margin-top:50px;" class="mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
-                    <div class="panel panel-info" >
-                        <div class="panel-heading">
-                            <div class="panel-title"><h1>Registreren</h1></div>
-                            <div style="float:right; font-size: 150%; position: relative; top:-45px"><a href="{{ url_for('login') }}">Inloggen</a></div>
+    <div class="panel panel-info" style="padding-top:2px">
+        <div class="panel-heading">
+            <center><div class="panel-title"><h3><strong>Account aanmaken</strong></h3></div>
+
+                <div style="padding-top:0px" class="panel-body" >
+
+                    <div style="display:none" id="login-alert" class="alert alert-danger col-sm-12"></div>
+
+                    <form id="loginform" class="form-horizontal" role="form">
+
+                        <div class="col-md-5 col-md-offset-3">
+                            <div class="form-group">
+                                <input autocomplete="off" autofocus class="form-control" name="gebruikersnaam" id="gebruikersnaam" placeholder="Gebruikersnaam" type="text" required/>
+                            </div>
+                        </div>
+                        <div class="col-md-5 col-md-offset-3">
+                            <div class="form-group">
+                                <input class="form-control" name="email" id="email" placeholder="Email" type="email" required/>
+                            </div>
+                        </div>
+                        <div class="col-md-5 col-md-offset-3">
+                            <div class="form-group">
+                                <input class="form-control" name="wachtwoord" id="wachtwoord" placeholder="Wachtwoord" type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required/>
+                            </div>
+                        </div>
+                        <div class="col-md-5 col-md-offset-3">
+                            <div class="form-group">
+                                <input class="form-control" name="wachtwoord-confirmatie" placeholder="Bevestig wachtwoord" type="password" required/>
+                            </div>
                         </div>
 
-                        <div style="padding-top:30px" class="panel-body" >
+                        <p><strong>Veiligheidsvraag: Wat is jouw lievelingskleur?</strong></p>
 
-                            <div style="display:none" id="login-alert" class="alert alert-danger col-sm-12"></div>
-
-                            <form id="loginform" class="form-horizontal" role="form">
-
-                                <div class="form-group">
-                                    <input autocomplete="off" autofocus class="form-control" name="gebruikersnaam" placeholder="Gebruikersnaam" type="text"/>
-                                </div>
-                                <div class="form-group">
-                                    <input class="form-control" name="email" placeholder="Email" type="email"/>
-                                </div>
-                                <div class="form-group">
-                                    <input class="form-control" name="wachtwoord" placeholder="Wachtwoord" type="password"/>
-                                </div>
-                                <div class="form-group">
-                                    <input class="form-control" name="wachtwoord-confirmatie" placeholder="Bevestig wachtwoord" type="password"/>
-                                </div>
-
-                                <p>Veiligheidsvraag: In welke stad staat jou favoriete bioscoop?</p>
-
-                                <div class = "form-group">
-                                    <input class="form-control" name="veiligheidsvraag" placeholder="Beantwoord vraag" type ="text">
-                                </div>
-
-                                <div class="form-group">
-                                    <div class="col-sm-12 controls">
-                                        <button class="btn btn-success" type="submit">Registreren</button>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <div class="col-md-12 control">
-                                        <div style="border-top: 1px solid#888; padding-top:15px; font-size:85%" >
-                                            Heb je al een account?
-                                            <a href="{{ url_for('login') }}">Log hier dan in!</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
+                        <div class="col-md-5 col-md-offset-3">
+                            <div class = "form-group">
+                                <input class="form-control" name="veiligheidsvraag" placeholder="Beantwoord vraag" type ="text" required/>
+                            </div>
                         </div>
+                        <div class="form-group">
+                            <div class="col-sm-12 controls">
+                                <button class="btn btn-success btn-sm" type="submit" value="submit">Registreren</button>
+                                <hr>
+                                <h6>
+                                    Heb je al een account?
+                                    <a href="{{ url_for('login') }}">Log hier dan in!</a>
+                                </h6>
+                            </div>
+                        </div>
+                    </form>
+                    <hr>
+                    <div id="bericht">
+                        <h6><u>Je wachtwoord moet het volgende bevatten:</u></h6>
+                        <p id="letter" class="invalid"><b>Een kleine letter</b></p>
+                        <p id="hoofdletter" class="invalid"><b>Een hoofdletter</b></p>
+                        <p id="number" class="invalid"><b>Een nummer</b></p>
+                        <p id="length" class="invalid"><b>Minimaal 8 karakters</b></p>
                     </div>
-        </form>
-    </body>
-</html>
+                </div>
+            </center>
+        </div>
+    </div>
+</form>
+
+<script>
+var mijninput = document.getElementById("wachtwoord");
+var letter = document.getElementById("letter");
+var hoofdletter = document.getElementById("hoofdletter");
+var number = document.getElementById("number");
+var length = document.getElementById("length");
+
+// When the user clicks on the password field, show the message box
+mijninput.onfocus = function() {
+  document.getElementById("bericht").style.display = "block";
+}
+
+// // When the user clicks outside of the password field, hide the message box
+// mijninput.onblur = function() {
+//   document.getElementById("bericht").style.display = "none";
+// }
+
+// When the user starts to type something inside the password field
+mijninput.onkeyup = function() {
+  // Validate lowercase letters
+  var kleineletter = /[a-z]/g;
+  if(mijninput.value.match(kleineletter)) {
+    letter.classList.remove("invalid");
+    letter.classList.add("valid");
+  } else {
+    letter.classList.remove("valid");
+    letter.classList.add("invalid");
+  }
+
+  // Validate capital letters
+  var hoofdletters = /[A-Z]/g;
+  if(mijninput.value.match(hoofdletters)) {
+    hoofdletter.classList.remove("invalid");
+    hoofdletter.classList.add("valid");
+  } else {
+    hoofdletter.classList.remove("valid");
+    hoofdletter.classList.add("invalid");
+  }
+
+  // Validate numbers
+  var numbers = /[0-9]/g;
+  if(mijninput.value.match(numbers)) {
+    number.classList.remove("invalid");
+    number.classList.add("valid");
+  } else {
+    number.classList.remove("valid");
+    number.classList.add("invalid");
+  }
+
+  // Validate length
+  if(mijninput.value.length >= 8) {
+    length.classList.remove("invalid");
+    length.classList.add("valid");
+  } else {
+    length.classList.remove("valid");
+    length.classList.add("invalid");
+  }
+}
+</script>
+{% endblock %}
+

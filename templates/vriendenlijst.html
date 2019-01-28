@@ -1,51 +1,52 @@
-<!DOCTYPE html>
+{% extends "layout.html" %}
 
-<html lang="en">
-    <head>
-        <!-- https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta -->
-        <meta charset="utf-8"/>
-        <meta content="initial-scale=1, width=device-width" name="viewport"/>
+{% block title %}
+    Vriendenlijst
+{% endblock %}
 
-        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+{% block main %}
+<center><strong><h2>Vriendenlijst</h2></strong></center>
+{% if lengte > 0 %}
+<bold style="float:right; position: relative; top:-40px">
+  <a href="/verzoeken">
+    <button type="button" class="btn btn-light">
+    Je hebt vriendschapsverzoeken <span class="badge badge-danger">{{lengte}}</span>
+    </button>
+  </a>
+</bold>
+{% endif %}
 
+<hr>
+{% for vriend in vrienden %}
+<ul style="list-style-type:square;">
+  <li><h4>{{vriend.van}}</h4></li>
+</ul>
+{% endfor %}
 
-        <title>NL Film | Vrienden</title>
-    </head>
+<hr>
 
-    <body>
-
-        <!-- Optional JavaScript -->
-        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="{{ url_for('homepage') }}">Nederlandse film</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('login') }}">Inloggen<span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('register') }}">Registreren<span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('overons') }}">Over ons</a>
-                    </li>
-                </ul>
-
-                <form class="form-inline my-2 my-lg-0" action="/zoeken" method="post">
-                    <div class="form-group">
-                    <input autocomplete="off" autofocus class="form-control" class="form-control mr-sm-2" type="text" name="zoekterm" placeholder="Zoekterm" aria-label="Search">
-                    </div>
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Zoek</button>
-                </form>
-            </div>
-        </nav>
+<style type='text/css'>
+  p {
+    padding: 5px;
+  }
+</style>
+<form action="{{ url_for('vriend') }}" method="post">
+  <p>
+    <center>
+      <h5>Iemand nog geen vriend van je?</h5>
+      <div class="text">
+        <h6>Voeg diegene nu toe!</h6>
+      </div>
+      <div class="col-md-4 col-md-offset-3">
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Noem gebruikersnaam" name="vriend" aria-label="vriend" aria-describedby="button-addon2">
+          <button class="btn btn-outline-success" type="submit" id="submit">Voeg toe</button>
+        </div>
+      </div>
+      <div class="text">
+        <font size="1" color="red"><i><b>Let op alleen gebruikersnamen, geen e-mails</b></i></font>
+      </div>
+    </center>
+  </p>
+</form>
+{% endblock %}
