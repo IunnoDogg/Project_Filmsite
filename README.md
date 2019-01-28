@@ -78,12 +78,12 @@ Zelf filminformatie en beoordelingen verzamelen.
 
 ### Minimum viable product:
 Er moet gezocht kunnen worden naar een specifieke film. Wanneer de film gevonden wordt, omvat de getoonde pagina in ieder geval:
-    * titel van de film
-    * jaar van uitkomst
-    * regisseur(s)
-    * acteurs
-    * poster/afbeelding
-    * beoordeling
+ * titel van de film
+ * jaar van uitkomst
+ * regisseur(s)
+ * acteurs
+ * poster/afbeelding
+ * beoordeling
 
 --- 
 
