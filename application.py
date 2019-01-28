@@ -381,15 +381,21 @@ def vriendenlijst():
     vrienden1 = db.execute("SELECT * FROM verzoeken WHERE van=:van AND geaccepteerd=:geaccepteerd",
                            van=gebruikersnaam, geaccepteerd="ja")
 
-    if len(vrienden) > 0:
+    print(vrienden)
+    print(vrienden1)
+
+    if vrienden:
         a = len(vrienden)
 
-    if len(vrienden1) > 0:
+    else:
+        a = 0
+
+    if vrienden1:
         b = len(vrienden1)
 
-    if len(vrienden) == 0 and len(vrienden1) == 0:
-        a = 0
+    else:
         b = 0
+
 
     return render_template("vriendenlijst.html", vrienden=vrienden, vrienden1=vrienden1, lengte=lengte, tipslengte=tipslengte, totaal=totaal, a=a, b=b)
 
@@ -1014,9 +1020,10 @@ def verwijdervriendredirect():
         totaal = tipslengte + lengte
 
         vriend = request.form.get("verwijder")
-        vriend1 = request.form.get("verwijder1")
+        if not vriend:
+            vriend = request.form.get("verwijder1")
 
-    return render_template("verwijdervriendredirect.html", vriend=vriend, lengte=lengte, tipslengte=tipslengte, totaal=totaal, vriend1=vriend1)
+    return render_template("verwijdervriendredirect.html", vriend=vriend, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/verwijdervriend", methods=["POST"])
 @login_required
