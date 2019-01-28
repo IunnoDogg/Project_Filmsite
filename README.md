@@ -94,14 +94,20 @@ Van tevoren bepaald:
 | [Bootstrap](https://getbootstrap.com/docs/4.2/getting-started/introduction/) | a HTML, CSS, and JS library      | 
 | [Bootsnipp](https://bootsnipp.com/) | code snippets for Bootstrap HTML/CSS/JS framework      | 
 
-
 #### Concurerende sites:
 |         | NL Films           | Filmvandaag           | TMDb           | IMDb           |  
 | --- | --- | --- | --- | --- |  
-| Internationale films | ☒ | ☑ | ☑ | ☒ | 
+| Internationale films | ☒ | ☑ | ☑ | ☑ | 
+| API (en toegankelijk) | ☒ | ☒ | ☑ | ☒ | 
+| Nieuws | ☒ | ☒ | ☒ | ☑ | 
+| Acteur achtergrondinformatie | ☒ | ☒ | ☑ | ☑ | 
+| Video games | ☒ | ☒ | ☒ | ☑ |
+| Vanavond op Nl. televisie | ☒ | ☑ | ☒ | ☒ |
+| Trivia vragen | ☒ | ☒ | ☒ | ☑ |
+| In de bioscoop | ☒ | ☑ | ☑ | ☑ |
+| Vergelijkbare films | ☒ | ☒ | ☑ | ☑ |
 
-https://www.imdb.com:
- * Niet gelimiteerd tot Nederlandse films, maar heeft ze wel.
+https://www.imdb.com
  * Commercieel en gebonden aan een groot, beursgenoteerd bedrijf (Amazon).
  * Heeft pagina's met nieuws over de filmindustrie.
  * Behandelt ook Video Games
