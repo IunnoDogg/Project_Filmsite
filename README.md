@@ -102,7 +102,7 @@ Van tevoren bepaald:
 
 
 #### Zaken die alternatieve sites wél hebben:
-|         | NL Films           | Filmvandaag           | TMDb           | IMDb           |  
+|         | NL Films           | [Filmvandaag](https://www.filmvandaag.nl)           | [TMDb](https://www.tmdb.com)           | [IMDb](https://www.imdb.com)           |  
 | --- | --- | --- | --- | --- |  
 | Internationale films | ☒ | ☑ | ☑ | ☑ | 
 | API (en toegankelijk) | ☒ | ☒ | ☑ | ☒ | 
