@@ -1,7 +1,7 @@
-# nederlandsefilm
-## Isa-Ali Kirca &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 12014672
-## Gerard Noordhuis &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 11919582
-## Patrick Smit &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 11433604
+# NL Films
+#### Isa-Ali Kirca &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 12014672
+#### Gerard Noordhuis &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 11919582
+#### Patrick Smit &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 11433604
 
 ### [Schetsen](https://docs.google.com/presentation/d/1Dk9pYlrxR6hi45ncdenz7bOs3y8t3Wdz3CnpoxP1xaI/edit?usp=sharing)
 Bekijk de concepten/schetsen op Google Slides^.
@@ -13,24 +13,26 @@ Bekijk de concepten/schetsen op Google Slides^.
 ## Features
 
 ### Voor bezoekers zonder account:
-  * 1.1 🏠 Homepagina:
-    * Lijst met de 12 populairste films
-    * Zoeken naar films
+  * 1.1 🖥 Vanaf elke pagina:
+    * 🔍 Zoeken naar films
+      * Zoekresultaten pagina
     * Registreren
     * Inloggen
       * Wachtwoord vergeten
         * Opnieuw instellen a.d.h.v. veiligheidsvraag
-
-  * 1.2 🍿 Filminformatie:
+  * 1.2 🏠 Homepagina:
+    * Lijst met de 12 populairste films
+  * 1.3 🍿 Filminformatie:
       * Omschrijving
       * Geef de rating van de film weer
         * wordt opgehaald van IMDb en anders van TMDb
       * Jaar van de release
       * Bekijk de regisseur(s), schrijver(s) en hoofdrolspelers
 
-# Voor ingelogde gebruikers:
+### Voor ingelogde gebruikers:
   * 2.1 Vanaf iedere pagina:
-    * Zoeken naar films
+    * 🔍 Zoeken naar films
+      * Zoekresultaten pagina
     * Filmlijsten bekijken:
       * Favoriete films
       * Bekeken films
