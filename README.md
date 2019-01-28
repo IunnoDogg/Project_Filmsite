@@ -13,7 +13,7 @@ Bekijk de concepten/schetsen op Google Slides^.
 ## Features
 
 ### Voor bezoekers zonder account:
-  * 1.1 🖥 Vanaf elke pagina:
+  * 1.1 Vanaf iedere pagina:
     * 🔍 Zoeken naar films
       * Zoekresultaten pagina
     * Registreren
@@ -33,7 +33,7 @@ Bekijk de concepten/schetsen op Google Slides^.
   * 2.1 Vanaf iedere pagina:
     * 🔍 Zoeken naar films
       * Zoekresultaten pagina
-    * Filmlijsten bekijken:
+    * ❤️ Filmlijsten bekijken:
       * Favoriete films
       * Bekeken films
       * Kijklijst
