@@ -21,7 +21,8 @@ Voor bezoekers zonder account:
 
   * 1.2 Filminformatie:
       * Omschrijving
-      * Weergeef de rating vanuit de API
+      * Geef de rating van de film weer
+       * wordt opgehaald van IMDb en anders van TMDb
       * Jaar van de release
       * Bekijk de regisseur(s), schrijver(s) en hoofdrolspelers
 
