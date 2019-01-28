@@ -18,6 +18,8 @@ Bekijk de concepten/schetsen op Google Slides^.
     * Zoeken naar films
     * Registreren
     * Inloggen
+      * Wachtwoord vergeten
+        * Opnieuw instellen a.d.h.v. veiligheidsvraag
 
   * 1.2 🍿 Filminformatie:
       * Omschrijving
@@ -27,8 +29,7 @@ Bekijk de concepten/schetsen op Google Slides^.
       * Bekijk de regisseur(s), schrijver(s) en hoofdrolspelers
 
 # Voor ingelogde gebruikers:
-  * 2.1 🏠 Homepagina:
-    * Lijst met de 12 populairste films
+  * 2.1 Vanaf iedere pagina:
     * Zoeken naar films
     * Filmlijsten bekijken:
       * Favoriete films
@@ -38,37 +39,33 @@ Bekijk de concepten/schetsen op Google Slides^.
     * 👥 Interactie met vrienden:
       * Vriendschapsverzoeken sturen a.d.h.v. gebruikersnaam
       * Vriendschapsverzoeken accepteren of weigeren
+      * Film tippen aan een vriend
       * Vriendenlijst bekijken
-    * 👤 Accountinteractie:
+    * 👤 Account:
       * Profiel bekijken
       * Wachtwoord wijzigen
       * Account verwijderen
       * Uitloggen
-
-  * 2.2 Filminformatie:
-    * Voeg film toe aan Favorietenlijst
+  * 2.2 🏠 Homepage:
+    * Lijst met de 12 populairste films  
+  * 2.3 🍿 Filminformatie:
+    * Voeg film toe aan Favorieten
+    * Verwijder film van Favorieten
     * Voeg film toe aan Kijklijst
     * Omschrijving
-    * Weergeef de rating vanuit de API
+    * Geef de rating van de film weer
+      * wordt opgehaald van IMDb en anders van TMDb    
     * Jaar van de release
     * Bekijk de regisseur(s), schrijver(s) en hoofdrolspelers
 
-  * 2.3 Eigen account
-    * Wachtwoord aanpassen
-    * Vriendenlijst bekijken
-    * Filmlijsten bekijken
-
-* Mogelijke extra’s
+* Eventueel in de toekomst:
   * Delen via Social Media.
   * Lijst met top gebruikers bekijken
   * Vrienden berichten sturen
-  * Filmtitels delen met een vriend
   * Films toevoegen aan een gezamenlijke lijst (update 2 lijsten)
-  * Mensen volgen
   * Per categorie: de beste films.
 
-
-Wat we niet doen:
+# Wat we niet doen:
   * Eigen ratings, beoordelingen et cetera, omdat IMDb en TMDb hierin niet te overtreffen zijn in het aantal relevante beoordelingen.
 
 
