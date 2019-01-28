@@ -97,7 +97,7 @@ Van tevoren bepaald:
 
 #### Concurerende sites:
 |         | NL Films           | Filmvandaag           | TMDb           | IMDb           |  
-| ------------- |:-------------:|:-------------:|:-------------:|  
+| ------------- |-------------|-------------|-------------|  
 | Internationale films | ☒ | ☑ | ☑ | ☒  
 
 https://www.imdb.com:
