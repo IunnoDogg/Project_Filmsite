@@ -12,22 +12,22 @@ Bekijk de concepten/schetsen op Google Slides^.
 
 ### Features
 
-Voor bezoekers zonder account:
-  * 1.1 Homepagina:
+# Voor bezoekers zonder account:
+  * 1.1 🏠 Homepagina:
     * Lijst met de 12 populairste films
     * Zoeken naar films
     * Registreren
     * Inloggen
 
-  * 1.2 Filminformatie:
+  * 1.2 🍿 Filminformatie:
       * Omschrijving
       * Geef de rating van de film weer
         * wordt opgehaald van IMDb en anders van TMDb
       * Jaar van de release
       * Bekijk de regisseur(s), schrijver(s) en hoofdrolspelers
 
-Voor ingelogde gebruikers:
-  * 2.1 Homepagina:
+# Voor ingelogde gebruikers:
+  * 2.1 🏠 Homepagina:
     * Lijst met de 12 populairste films
     * Zoeken naar films
     * Filmlijsten bekijken:
@@ -35,15 +35,15 @@ Voor ingelogde gebruikers:
       * Bekeken films
       * Kijklijst
       * Check-ins
-    * Interactie met vrienden:
+    * 👥 Interactie met vrienden:
       * Vriendschapsverzoeken sturen a.d.h.v. gebruikersnaam
       * Vriendschapsverzoeken accepteren of weigeren
       * Vriendenlijst bekijken
-    * Accountinteractie:
+    * 👤 Accountinteractie:
       * Profiel bekijken
       * Wachtwoord wijzigen
       * Account verwijderen
-    * Uitloggen
+      * Uitloggen
 
   * 2.2 Filminformatie:
     * Voeg film toe aan Favorietenlijst
