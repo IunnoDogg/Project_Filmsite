@@ -29,8 +29,10 @@ grid {
 <hr>
 
 <div class="grid">
-  {% for tip in aanbevelingen %}
-  <button class="favoriet standaard" text-align="center" style="width:300px;" name="#" value="#" type="submit">{{tip.titel}}<img src="http://image.tmdb.org/t/p/w45{{tip.afbeelding}}"></img><p></p></button>
-  {% endfor %}
+  <form action="/filminfo" method="post">
+    {% for tip in aanbevelingen %}
+   <p>Getipt door {{tip.van}}</p><button class="favoriet standaard" text-align="center" style="width:300px;" name="tmdb_id" value="{{tip.film_id}}" type="submit"><img src="http://image.tmdb.org/t/p/w45{{tip.afbeelding}}"></img><p>{{tip.titel}}</p></button>
+    {% endfor %}
+  </form>
 </div>
 {% endblock %}

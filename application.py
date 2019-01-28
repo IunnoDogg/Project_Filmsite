@@ -61,13 +61,34 @@ def lengte_vv():
         lengte = 0
         return lengte
 
+def tipslength():
+    gebruikersnaam = gebruiker()
+
+    tips = db.execute("SELECT van FROM aanbevelingen WHERE naar=:naar", naar=gebruikersnaam)
+
+    if tips:
+        tipslengte = len(tips)
+        return tipslengte
+
+    else:
+        tipslengte = 0
+        return tipslengte
+
 def apology(message, code=400):
     """Renders message as an apology to user."""
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
-    return render_template("apology.html", top=code, bottom=message, lengte=lengte)
+
+    return render_template("apology.html", top=code, bottom=message, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
+
+def apologynon(message, code=400):
+    """Renders message as an apology to user."""
+
+    return render_template("apologynon.html", top=code, bottom=message)
 
 def addtohistory(tmdb_id, tmdb_response):
     gebruikersnaam = gebruiker()
@@ -111,27 +132,27 @@ def select(zoekterm, tabel, gelijke_var, variabelen):
 
 def registerform():
     if not request.form.get("gebruikersnaam"):
-        return apology("Geef een gebruikersnaam op.")
+        return apologynon("Geef een gebruikersnaam op.")
 
     # ensure password was submitted
     elif not request.form.get("email"):
-        return apology("Geef een e-mailadres op.")
+        return apologynon("Geef een e-mailadres op.")
 
     # ensure password was submitted
     elif not request.form.get("wachtwoord"):
-        return apology("Geef een wachtwoord op.")
+        return apologynon("Geef een wachtwoord op.")
 
     # ensure password-confirmation was submitted
     elif not request.form.get("wachtwoord-confirmatie"):
-        return apology("Geef het wachtwoord nogmaals op.")
+        return apologynon("Geef het wachtwoord nogmaals op.")
 
     # ensure password equals password confirmation
     if request.form.get("wachtwoord") != request.form.get("wachtwoord-confirmatie"):
-        return apology("De bevestiging komt niet overeen met het wachtwoord.")
+        return apologynon("De bevestiging komt niet overeen met het wachtwoord.")
 
     # ensure the security question has been answered
     elif not request.form.get("veiligheidsvraag"):
-        return apology("Beantwoord de veiligheidsvraag.")
+        return apologynon("Beantwoord de veiligheidsvraag.")
 
 
 @app.route("/layout")
@@ -140,8 +161,10 @@ def layout():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
-    return render_template("layout.html", verzoeken=verzoeken, lengte=lengte)
+    return render_template("layout.html", verzoeken=verzoeken, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/index")
 @login_required
@@ -153,8 +176,11 @@ def index():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
+    print(totaal)
 
-    return render_template("index.html", results=popular_results, lengte=lengte)
+    return render_template("index.html", results=popular_results, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/")
 def homepage():
@@ -170,14 +196,18 @@ def wachtwoord():
     return render_template("wachtwoord.html")
 
 @app.route("/overons")
+@login_required
 def overons():
-    if session["user_id"] > 0:
-        gebruikersnaam = gebruiker()
-        verzoeken = verzoek()
-        lengte = lengte_vv()
-        return render_template("overons.html", lengte=lengte)
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+    tipslengte = tipslength()
+    totaal = tipslengte + lengte
+    return render_template("overons.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
-    return render_template("overons.html")
+@app.route("/overonsz")
+def overonsz():
+    return render_template("overonsz.html")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -196,7 +226,7 @@ def register():
                             email=request.form.get("email"), veiligheidsvraag=request.form.get("veiligheidsvraag"))
 
         if not result:
-            return apology("username already exists")
+            return apologynon("username already exists")
 
         # query database for username
         rows = db.execute("SELECT * FROM gebruikers WHERE gebruikersnaam = :gebruikersnaam",
@@ -223,8 +253,11 @@ def login():
     # if user reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
-        ophalenmislukt("gebruiker-inloggen", "Geef een gebruikersnaam op")
-        ophalenmislukt("wachtwoord-inloggen", "Geef een wachtwoord op")
+        if not request.form.get("gebruiker-inloggen"):
+            return apologynon("Geef een gebruikersnaam op")
+
+        if not request.form.get("wachtwoord-inloggen"):
+            return apologynon("Geef een wachtwoord op")
 
         # # query database for username
         # x = "gebruikersnaam=" + ophalen("gebruiker-inloggen")
@@ -238,11 +271,11 @@ def login():
 
         if len(rows) == 0:
             if len(rows1) != 1 or not pwd_context.verify(request.form.get("wachtwoord-inloggen"), rows1[0]["wachtwoord"]):
-                return apology("Ongeldige email en/of wachtwoord")
+                return apologynon("Ongeldige email en/of wachtwoord")
 
         # ensure username exists and password is correct
         elif len(rows) != 1 or not pwd_context.verify(request.form.get("wachtwoord-inloggen"), rows[0]["wachtwoord"]):
-            return apology("Ongeldige gebruikersnaam en/of wachtwoord")
+            return apologynon("Ongeldige gebruikersnaam en/of wachtwoord")
 
         # remember which user has logged in
         if len(rows) > 0:
@@ -275,6 +308,8 @@ def vriend():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
     if request.method == "POST":
 
@@ -304,35 +339,20 @@ def vriend():
                                           van=toetevoegenvriend, naar=gebruikersnaam, uitgenodigd="ja", geaccepteerd="nee", afgewezen="nee")
 
         aluitgenodigdjij = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND uitgenodigd=:uitgenodigd AND geaccepteerd=:geaccepteerd AND afgewezen=:afgewezen",
-                                       van=gebruikersnaam, naar=toetevoegenvriend, uitgenodigd="ja", geaccepteerd="nee", afgewezen="nee")
+                                      van=gebruikersnaam, naar=toetevoegenvriend, uitgenodigd="ja", geaccepteerd="nee", afgewezen="nee")
 
         if aluitgenodigdvriend or aluitgenodigdjij:
             return apology("Deze gebruiker heeft je al uitgenodigd of andersom")
 
-        nogeenkeeruitnodigenjij = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND uitgenodigd=:uitgenodigd \
-                                          AND geaccepteerd=:geaccepteerd AND afgewezen=:afgewezen",
-                                          van=gebruikersnaam, naar=toetevoegenvriend, uitgenodigd="ja", geaccepteerd="nee", afgewezen="ja")
-
-        nogeenkeeruitnodigen = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND uitgenodigd=:uitgenodigd \
-                                          AND geaccepteerd=:geaccepteerd AND afgewezen=:afgewezen",
-                                          naar=gebruikersnaam, van=toetevoegenvriend, uitgenodigd="ja", geaccepteerd="nee", afgewezen="ja")
-
-        if nogeenkeeruitnodigenjij:
-            db.execute("UPDATE verzoeken SET afgewezen=:afgewezen WHERE van=:van AND naar=:naar",
-                        van=toetevoegenvriend, naar=gebruikersnaam, afgewezen="nee")
-
-        if nogeenkeeruitnodigen:
-            db.execute("UPDATE verzoeken SET afgewezen=:afgewezen WHERE van=:van AND naar=:naar",
-                        van=toetevoegenvriend, naar=gebruikersnaam, afgewezen="nee")
-
         else:
+            now = datetime.datetime.now()
+            date = now.strftime("%d-%m-%Y")
+            db.execute("INSERT INTO verzoeken (van, naar, geaccepteerd, uitgenodigd, afgewezen, datum) VALUES (:van, :naar, :geaccepteerd, :uitgenodigd, :afgewezen, :datum)",
+                        van=gebruikersnaam, naar=toetevoegenvriend, geaccepteerd="nee", uitgenodigd="ja", afgewezen="nee", datum=date)
 
-            db.execute("INSERT INTO verzoeken (van, naar, geaccepteerd, uitgenodigd, afgewezen) VALUES (:van, :naar, :geaccepteerd, :uitgenodigd, :afgewezen)",
-                        van=gebruikersnaam, naar=toetevoegenvriend, geaccepteerd="nee", uitgenodigd="ja", afgewezen="nee")
+            return render_template("toegevoegd.html", toetevoegenvriend=toetevoegenvriend, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
-            return render_template("toegevoegd.html", toetevoegenvriend=toetevoegenvriend, lengte=lengte)
-
-    return render_template("vriendtoevoegen.html", lengte=lengte)
+    return render_template("vriendtoevoegen.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/toegevoegd", methods=["GET", "POST"])
 @login_required
@@ -340,20 +360,40 @@ def toegevoegd():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
-    return render_template("toegevoegd.html", lengte=lengte)
+    return render_template("toegevoegd.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/vriendenlijst")
 @login_required
 def vriendenlijst():
 
     gebruikersnaam = gebruiker()
-    vrienden = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd",
-                           naar=gebruikersnaam, geaccepteerd="ja")
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
-    return render_template("vriendenlijst.html", vrienden=vrienden, lengte=lengte)
+    vrienden = db.execute("SELECT * FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd",
+                           naar=gebruikersnaam, geaccepteerd="ja")
+
+    vrienden1 = db.execute("SELECT * FROM verzoeken WHERE van=:van AND geaccepteerd=:geaccepteerd",
+                           van=gebruikersnaam, geaccepteerd="ja")
+
+    if len(vrienden) > 0:
+        a = len(vrienden)
+
+    if len(vrienden1) > 0:
+        b = len(vrienden1)
+
+    if len(vrienden) == 0 and len(vrienden1) == 0:
+        a = 0
+        b = 0
+
+    return render_template("vriendenlijst.html", vrienden=vrienden, vrienden1=vrienden1, lengte=lengte, tipslengte=tipslengte, totaal=totaal, a=a, b=b)
+
+
 
 @app.route("/verzoeken", methods=["GET", "POST"])
 @login_required
@@ -362,6 +402,8 @@ def verzoeken():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
     if request.method == "POST":
         accepteren = request.form.get("accepteren")
@@ -369,18 +411,29 @@ def verzoeken():
 
         if not accepteren:
             weigeren = weigerenn[1:]
-            db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd AND afgewezen=:afgewezen WHERE van=:van AND naar=:naar",
-                        geaccepteerd="nee", afgewezen="ja", van=weigeren, naar=gebruikersnaam)
+            now = datetime.datetime.now()
+            date = now.strftime("%d-%m-%Y")
+            # db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd AND afgewezen=:afgewezen WHERE van=:van AND naar=:naar",
+            #             geaccepteerd="nee", afgewezen="ja", van=weigeren, naar=gebruikersnaam)
 
-            return redirect("/verzoeken")
+            db.execute("DELETE FROM verzoeken WHERE van=:van AND naar=:naar", naar=gebruikersnaam, van=weigeren)
+            db.execute("INSERT INTO verzoeken (van, naar, geaccepteerd, uitgenodigd, afgewezen, datum) VALUES (:van, :naar, :geaccepteerd, :uitgenodigd, :afgewezen, :datum)",
+                        van=weigeren, naar=gebruikersnaam, geaccepteerd="nee", uitgenodigd="ja", afgewezen="ja", datum=date)
 
-        else:
-            db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd WHERE van=:van AND naar=:naar", geaccepteerd="ja",
-                        van=accepteren, naar=gebruikersnaam)
+            return render_template("geweigerd.html", verzoeken=verzoeken, lengte=lengte, tipslengte=tipslengte, totaal=totaal, weigeren=weigeren)
 
-            return redirect("/verzoeken")
+        elif accepteren:
+            now = datetime.datetime.now()
+            date = now.strftime("%d-%m-%Y")
+            # db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd AND datum=:datum WHERE van=:van AND naar=:naar",
+            #             geaccepteerd="piemel", datum=date, van=accepteren, naar=gebruikersnaam)
+            db.execute("DELETE FROM verzoeken WHERE van=:van AND naar=:naar", naar=gebruikersnaam, van=accepteren)
+            db.execute("INSERT INTO verzoeken (van, naar, geaccepteerd, datum) VALUES (:van, :naar, :geaccepteerd, :datum)",
+                        van=accepteren, naar=gebruikersnaam, geaccepteerd="ja", datum=date)
 
-    return render_template("verzoeken.html", verzoeken=verzoeken, lengte=lengte)
+            return render_template("geaccepteerd.html", verzoeken=verzoeken, lengte=lengte, tipslengte=tipslengte, totaal=totaal, accepteren=accepteren)
+
+    return render_template("verzoeken.html", verzoeken=verzoeken, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 # ZOEKEN
 '''
@@ -410,6 +463,12 @@ def zoeken(zoekterm, pagenr):
 @login_required
 def zoekresultaat():
 
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
+
     if request.method == "POST":
         zoekterm = request.form.get("zoekterm")
 
@@ -423,7 +482,7 @@ def zoekresultaat():
                 zoekresultaten += zoeken(zoekterm, x)["results"]
                 x += 1
 
-            return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten, lengte=lengte)
+            return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
         else:
             return apology("Iets ging mis")
@@ -434,7 +493,7 @@ def zoekresultaat_non():
     if request.method == "POST":
         zoekterm = request.form.get("zoekterm")
 
-        if not zoekterm: return apology("Geen zoekterm")
+        if not zoekterm: return apologynon("Geen zoekterm")
 
         # resultaten pagina 1 - 30
         elif zoeken(zoekterm, 1) != False:
@@ -476,6 +535,8 @@ def filminformatie():
         gebruikersnaam = gebruiker()
         verzoeken = verzoek()
         lengte = lengte_vv()
+        tipslengte=tipslength()
+        totaal = tipslengte + lengte
 
         vrienden = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd",
                            naar=gebruikersnaam, geaccepteerd="ja")
@@ -483,7 +544,7 @@ def filminformatie():
         favorieten = db.execute("SELECT film_id FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
         alfavo = any([favoriet['film_id'] == tmdb_id for favoriet in favorieten])
 
-        return render_template("filminformatie.html", tmdb=tmdb_response, omdb=omdb_response, alfavo=alfavo, lengte=lengte, vrienden=vrienden)
+        return render_template("filminformatie.html", tmdb=tmdb_response, omdb=omdb_response, alfavo=alfavo, lengte=lengte, tipslengte=tipslengte, totaal=totaal, vrienden=vrienden)
 
 @app.route("/filminfo_non", methods=["GET", "POST"])
 def filminformatie_non():
@@ -516,8 +577,10 @@ def mijnprofiel():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
-    return render_template("mijnprofiel.html", lengte=lengte)
+    return render_template("mijnprofiel.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/wachtwoordvergeten", methods=["GET", "POST"])
 def wachtwoordvergeten():
@@ -533,41 +596,37 @@ def wachtwoordveranderen():
     if request.method == 'POST':
 
         if not request.form.get('gebruikersnaam'):
-            return apology("Vul je gebruikersnaam in")
+            return apologynon("Vul je gebruikersnaam in")
 
         # pak id uit database
         account = db.execute("SELECT * FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam",
                               gebruikersnaam=request.form.get('gebruikersnaam'))
 
-        # bevestig of het wachtwoord klopt
-        if len(account) != 1 or not pwd_context.verify(request.form.get('wachtwoord'), account[0]['wachtwoord']):
-            return apology("Het wachtwoord klopt niet!")
-
         # check of een nieuw wachtwoord is ingevuld
         if not request.form.get("nieuw_wachtwoord"):
-            return apology("Vul een nieuw wachtwoord in")
+            return apologynon("Vul een nieuw wachtwoord in")
 
         # check of het nieuwe wachtwoord is herhaald
         if not request.form.get("wachtwoord_herhaling"):
-            return apology("Herhaal je nieuwe wachtwoord")
+            return apologynon("Herhaal je nieuwe wachtwoord")
 
         # controleer of beide wachtwoorden overeenkomen
         if request.form.get("nieuw_wachtwoord") != request.form.get("wachtwoord_herhaling"):
-            return apology("De wachtwoorden komen niet overeen")
+            return apologynon("De wachtwoorden komen niet overeen")
 
         # beantwoord de veiligheidsvraag
         if not request.form.get('veiligheidsvraag'):
-            return apology("Beantwoord de veiligheidsvraag.")
+            return apologynon("Beantwoord de veiligheidsvraag.")
 
         # bevestig of het antwoord klopt
         if len(account) != 1 or request.form.get('veiligheidsvraag') != account[0]['veiligheidsvraag']:
-            return apology("Het antwoord op de veiligheidsvraag klopt niet!")
+            return apologynon("Het antwoord op de veiligheidsvraag klopt niet!")
 
         wachtwoordcheck = db.execute("SELECT wachtwoord FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam",
                                       gebruikersnaam=account[0]["gebruikersnaam"])
 
         if pwd_context.verify(request.form.get("nieuw_wachtwoord"), wachtwoordcheck[0]["wachtwoord"]):
-            return apology("Niet mogelijk om je huidige wachtwoord te kiezen")
+            return apologynon("Niet mogelijk om je huidige wachtwoord te kiezen")
 
         # maak een hash van het wachtwoord
         new_hash = pwd_context.hash(request.form.get("nieuw_wachtwoord"))
@@ -578,7 +637,7 @@ def wachtwoordveranderen():
                                 gebruikersnaam=request.form.get('gebruikersnaam'), wachtwoord=new_hash)
 
         if not resultaat:
-            return apology("Iets ging fout...")
+            return apologynon("Iets ging fout...")
 
         return render_template("wachtwoordveranderd.html")
 
@@ -593,6 +652,8 @@ def wachtwoordgebruikers():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
     if request.method == 'POST':
 
@@ -636,10 +697,10 @@ def wachtwoordgebruikers():
         if not resultaat:
             return apology("Iets ging fout...")
 
-        return render_template("wachtwoordveranderd.html", lengte=lengte)
+        return render_template("wachtwoordveranderd.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
     else:
-        return render_template("wachtwoordgebruikers.html", lengte=lengte)
+        return render_template("wachtwoordgebruikers.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/wachtwoordveranderd")
 def wachtwoordveranderd():
@@ -647,8 +708,10 @@ def wachtwoordveranderd():
         gebruikersnaam = gebruiker()
         verzoeken = verzoek()
         lengte = lengte_vv()
+        tipslengte=tipslength()
+        totaal = tipslengte + lengte
 
-        return render_template("wachtwoordveranderd.html", lengte=lengte)
+        return render_template("wachtwoordveranderd.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
     return render_template("wachtwoordveranderd.html")
 
@@ -660,6 +723,8 @@ def accountverwijderen():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
     if request.method == "POST":
 
@@ -690,9 +755,9 @@ def accountverwijderen():
             db.execute("DELETE FROM gebruikers WHERE gebruikersnaam=:gebruikersnaam", gebruikersnaam=gebruikersnaam)
             db.execute("DELETE FROM verzoeken WHERE naar=:naar OR van=:van", naar=gebruikersnaam, van=gebruikersnaam)
 
-            return render_template("verwijderd.html", gebruikersnaam=gebruikersnaam, lengte=lengte)
+            return render_template("verwijderd.html", gebruikersnaam=gebruikersnaam, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
-    return render_template("accountverwijderen.html", lengte=lengte)
+    return render_template("accountverwijderen.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/favorieten", methods=["GET", "POST"])
 @login_required
@@ -701,10 +766,12 @@ def favorieten():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
     favorieten = db.execute("SELECT * FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
 
-    return render_template("favorieten.html", favorieten=favorieten, lengte=lengte)
+    return render_template("favorieten.html", favorieten=favorieten, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/addfavorite", methods=["POST"])
 @login_required
@@ -713,6 +780,8 @@ def addfavorite():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
     if request.method == "POST":
 
@@ -739,7 +808,7 @@ def addfavorite():
         db.execute("INSERT INTO favorieten (gebruiker, film_id, titel, afbeelding) VALUES (:gebruiker, :film_id, :titel, :afbeelding)",
                     gebruiker=gebruikersnaam, film_id=tmdb_id, titel=tmdb_response["original_title"], afbeelding=tmdb_response["poster_path"])
 
-        return render_template("addfavorite.html", tmdb=tmdb_response, omdb=omdb_response, favorieten=favorieten, lengte=lengte)
+        return render_template("addfavorite.html", tmdb=tmdb_response, omdb=omdb_response, favorieten=favorieten, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/removefavorite", methods=["POST"])
 @login_required
@@ -748,6 +817,8 @@ def removefavorite():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
     if request.method == "POST":
 
@@ -772,7 +843,7 @@ def removefavorite():
         db.execute("DELETE FROM favorieten WHERE gebruiker=:gebruiker AND film_id=:film_id",
                     gebruiker=gebruikersnaam, film_id=tmdb_id)
 
-        return render_template("removefavorite.html", tmdb=tmdb_response, omdb=omdb_response, lengte=lengte)
+        return render_template("removefavorite.html", tmdb=tmdb_response, omdb=omdb_response, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/historie", methods=["GET", "POST"])
 @login_required
@@ -780,17 +851,19 @@ def historie():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
     historie = db.execute("SELECT * FROM historie WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
 
     if request.method == "POST":
         if len(historie) > 0:
             db.execute("DELETE FROM historie WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
-            return render_template("legehistorie.html", historie=historie, lengte=lengte)
+            return render_template("legehistorie.html", historie=historie, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
         else:
             return apology("Je hebt geen kijkgeschiedenis")
 
-    return render_template("historie.html", historie=historie, lengte=lengte)
+    return render_template("historie.html", historie=historie, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/legehistorie", methods=["GET", "POST"])
 @login_required
@@ -798,8 +871,10 @@ def legehistorie():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
-    return render_template("legehistorie.html", lengte=lengte)
+    return render_template("legehistorie.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/mijnkijklijst", methods=["GET", "POST"])
 @login_required
@@ -807,8 +882,10 @@ def mijnkijklijst():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
-    return render_template("mijnkijklijst.html", lengte=lengte)
+    return render_template("mijnkijklijst.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/mijnlijsten", methods=["GET", "POST"])
 @login_required
@@ -816,8 +893,10 @@ def mijnlijsten():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
-    return render_template("mijnlijsten.html", lengte=lengte)
+    return render_template("mijnlijsten.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/checkins", methods=["GET", "POST"])
 @login_required
@@ -825,8 +904,10 @@ def checkins():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
-    return render_template("checkins.html", lengte=lengte)
+    return render_template("checkins.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/tipvriend", methods=["POST"])
 @login_required
@@ -835,6 +916,8 @@ def tipvriend():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
     from urllib.request import urlopen
     popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
@@ -866,16 +949,21 @@ def tipvriend():
                             naar=gebruikersnaam, van=vriend, geaccepteerd="ja")
 
         if check or check2:
+            tipcheck = db.execute("SELECT * FROM aanbevelingen WHERE van=:van AND naar=:naar AND film_id=:film_id",
+                                   van=gebruikersnaam, naar=vriend, film_id=tmdb_id)
+
+            if tipcheck:
+                return apology("Je hebt deze gebruiker deze film al aanbevolen")
+
             tips = db.execute("INSERT INTO aanbevelingen (van, naar, film_id, titel, afbeelding) VALUES (:van, :naar, :film_id, :titel, :afbeelding)",
                         van=gebruikersnaam, naar=vriend, film_id=tmdb_id, titel=tmdb_response["original_title"], afbeelding=tmdb_response["poster_path"])
 
             aanbevelingen = db.execute("SELECT * FROM aanbevelingen WHERE van=:van", van=gebruikersnaam)
-            return render_template("tips.html", tmdb=tmdb_response, omdb=omdb_response, favorieten=favorieten, lengte=lengte, aanbevelingen=aanbevelingen)
+
+            return render_template("index.html", results=popular_results, tmdb=tmdb_response, omdb=omdb_response, favorieten=favorieten, lengte=lengte, tipslengte=tipslengte, totaal=totaal, aanbevelingen=aanbevelingen)
 
         else:
             return apology("Deze gebruiker is geen vriend van je")
-
-        return redirect(url_for("index"))
 
 @app.route("/tips", methods=["GET", "POST"])
 @login_required
@@ -883,5 +971,94 @@ def tips():
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
-    aanbevelingen = db.execute("SELECT * FROM aanbevelingen WHERE van=:van", van=gebruikersnaam)
-    return render_template("tips.html", lengte=lengte, aanbevelingen=aanbevelingen)
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
+    aanbevelingen = db.execute("SELECT * FROM aanbevelingen WHERE naar=:naar", naar=gebruikersnaam)
+    return render_template("tips.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal, aanbevelingen=aanbevelingen)
+
+@app.route("/profielvriend", methods=["GET", "POST"])
+@login_required
+def profielvriend():
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
+    return render_template("profielvriend.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
+
+@app.route("/vriendinfo", methods=["POST"])
+@login_required
+def vriendinfo():
+    if request.method == "POST":
+        gebruikersnaam = gebruiker()
+        verzoeken = verzoek()
+        lengte = lengte_vv()
+        tipslengte=tipslength()
+        totaal = tipslengte + lengte
+
+        vriend = request.form.get("profiel")
+        vriend1 = request.form.get("profiel1")
+
+        favorieten = db.execute("SELECT * FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=vriend)
+        favorieten1 = db.execute("SELECT * FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=vriend1)
+    return render_template("vriendinfo.html", favorieten=favorieten, lengte=lengte, tipslengte=tipslengte, totaal=totaal, favorieten1=favorieten1)
+
+@app.route("/verwijdervriendredirect", methods=["POST"])
+@login_required
+def verwijdervriendredirect():
+    if request.method == "POST":
+        gebruikersnaam = gebruiker()
+        verzoeken = verzoek()
+        lengte = lengte_vv()
+        tipslengte=tipslength()
+        totaal = tipslengte + lengte
+
+        vriend = request.form.get("verwijder")
+        vriend1 = request.form.get("verwijder1")
+
+    return render_template("verwijdervriendredirect.html", vriend=vriend, lengte=lengte, tipslengte=tipslengte, totaal=totaal, vriend1=vriend1)
+
+@app.route("/verwijdervriend", methods=["POST"])
+@login_required
+def verwijdervriend():
+    if request.method == "POST":
+        gebruikersnaam = gebruiker()
+        verzoeken = verzoek()
+        lengte = lengte_vv()
+        tipslengte=tipslength()
+        totaal = tipslengte + lengte
+
+        vriend = request.form.get("verwijder")
+        vriendd = request.form.get("verwijder1")
+
+        if vriend:
+            vriendcheck = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
+                                     naar=gebruikersnaam, van=vriend, geaccepteerd="ja")
+
+            vriendcheckk = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
+                                      van=gebruikersnaam, naar=vriend, geaccepteerd="ja")
+
+            if vriendcheck:
+                db.execute("DELETE FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
+                            naar=gebruikersnaam, van=vriend, geaccepteerd="ja")
+
+            elif vriendcheckk:
+                db.execute("DELETE FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
+                            van=gebruikersnaam, naar=vriend, geaccepteerd="ja")
+
+        elif vriendd:
+            vriendcheck = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
+                                      naar=gebruikersnaam, van=vriendd, geaccepteerd="ja")
+
+            vriendcheckk = db.execute("SELECT * FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
+                                      van=gebruikersnaam, naar=vriendd, geaccepteerd="ja")
+
+            if vriendcheck:
+                db.execute("DELETE FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
+                            naar=gebruikersnaam, van=vriendd, geaccepteerd="ja")
+
+            elif vriendcheckk:
+                db.execute("DELETE FROM verzoeken WHERE van=:van AND naar=:naar AND geaccepteerd=:geaccepteerd",
+                            van=gebruikersnaam, naar=vriendd, geaccepteerd="ja")
+
+        return render_template("verwijderdvriend.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
