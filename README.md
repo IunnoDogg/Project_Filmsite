@@ -71,8 +71,7 @@ Bekijk de concepten/schetsen op Google Slides^.
 
 Van tevoren bepaald:
 # Wat we niet doen:
-  * Eigen ratings, beoordelingen et cetera, omdat IMDb en TMDb hierin niet te overtreffen zijn in het aantal relevante beoordelingen.
-
+  * Zelf filminformatie en beoordelingen verzamelen. 
 
 ### Minimum viable product:
   * Er moet gezocht kunnen worden naar een specifieke film. Wanneer de film gevonden wordt, omvat de getoonde pagina in ieder geval:
@@ -85,8 +84,7 @@ Van tevoren bepaald:
 
 --- 
 
-### Afhankelijkheden
-#### Gebruikte diensten
+#### Gebruikte diensten/afhankelijkheden
 
 | Service        | Wat           | 
 | ------------- |:-------------| 
@@ -95,13 +93,9 @@ Van tevoren bepaald:
 | [Bootstrap](https://getbootstrap.com/docs/4.2/getting-started/introduction/) | A HTML, CSS, and JS library      | 
 | [Bootsnipp](https://bootsnipp.com/) | Code snippets for Bootstrap HTML/CSS/JS framework      | 
 
-#### Wat NL Films niche maakt:
-* Gebruikersvriendelijk en overzichtelijk
-* Data van zowel The Movie Database als van The International Movie Database (via OMDb).
-* Geen commerciële doeleinden.
 
+#### Wat andere films wél doen.
 
-#### Zaken die alternatieve sites wél hebben:
 |         | NL Films           | [Filmvandaag](https://www.filmvandaag.nl)           | [TMDb](https://www.tmdb.com)           | [IMDb](https://www.imdb.com)           |  
 | --- | --- | --- | --- | --- |  
 | Internationale films | ☒ | ☑ | ☑ | ☑ | 
@@ -114,18 +108,3 @@ Van tevoren bepaald:
 | In de bioscoop | ☒ | ☑ | ☑ | ☑ |
 | Vergelijkbare films | ☒ | ☒ | ☑ | ☑ |
 | Informatie uit eigen database | ☒ | ☒ | ☑ | ☑ |
-
-https://www.imdb.com
- * Commercieel en gebonden aan een groot, beursgenoteerd bedrijf (Amazon).
- * Heeft pagina's met nieuws over de filmindustrie.
- * Behandelt ook Video Games
-
-https://www.tmdb.com:
- * Heeft links naar de films die momenteel in de bioscoop draaaien.
- * Internetfora over films
-
- https://www.filmvandaag.nl:
-  * Heeft links naar de films die momenteel in de bioscoop draaaien.
-  * Heeft links naar de series/films die te zien zijn op Netfilx
-  * Geeft releases op dvd/bluray aan.
-
