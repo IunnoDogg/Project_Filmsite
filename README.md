@@ -87,8 +87,12 @@ Van tevoren bepaald:
 ### Afhankelijkheden
 #### Eventueel te gebruiken API’s:
 
-The Movie Database(TMDb):
-https://www.themoviedb.org/documentation/api
+| Service        | Wat           | 
+| ------------- |:-------------:| 
+| [The Movie Database](https://www.themoviedb.org/documentation/api) (TMDb)     | API  |
+| col 2 is      | centered      |
+| zebra stripes | are neat      | 
+
 
 Filmtotaal:
 http://api.filmtotaal.nl/
