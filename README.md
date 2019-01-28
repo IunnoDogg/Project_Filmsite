@@ -67,6 +67,8 @@ Bekijk de concepten/schetsen op Google Slides^.
   * Films toevoegen aan een gezamenlijke lijst (update 2 lijsten)
   * Per categorie: de beste films.
 
+---
+Van tevoren bepaald:
 # Wat we niet doen:
   * Eigen ratings, beoordelingen et cetera, omdat IMDb en TMDb hierin niet te overtreffen zijn in het aantal relevante beoordelingen.
 
@@ -74,12 +76,13 @@ Bekijk de concepten/schetsen op Google Slides^.
 ### Minimum viable product:
   * Er moet gezocht kunnen worden naar een specifieke film. Wanneer de film gevonden wordt, omvat de getoonde pagina in ieder geval:
     * titel van de film
-    * jaar van uitkomst in theaters
+    * jaar van uitkomst
     * regisseur(s)
     * acteurs
-    * poster/afbeelding/omzet
+    * poster/afbeelding
     * beoordeling
 
+--- 
 
 ### Afhankelijkheden
 #### Eventueel te gebruiken API’s:
