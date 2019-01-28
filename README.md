@@ -89,12 +89,18 @@ Van tevoren bepaald:
 
 | Service        | Wat           | 
 | ------------- |:-------------:| 
-| [The Movie Database](https://www.themoviedb.org/documentation/api) (TMDb)     | film database  API  |
-| [The Open Movie Database](http://www.omdbapi.com) (OMDb)      | film database API      |
-| [Bootstrap](https://getbootstrap.com/docs/4.2/getting-started/introduction/) | a HTML, CSS, and JS library      | 
-| [Bootsnipp](https://bootsnipp.com/) | code snippets for Bootstrap HTML/CSS/JS framework      | 
+| [The Movie Database](https://www.themoviedb.org/documentation/api) (TMDb)     | Film database  API  |
+| [The Open Movie Database](http://www.omdbapi.com) (OMDb)      | Film database API      |
+| [Bootstrap](https://getbootstrap.com/docs/4.2/getting-started/introduction/) | A HTML, CSS, and JS library      | 
+| [Bootsnipp](https://bootsnipp.com/) | Code snippets for Bootstrap HTML/CSS/JS framework      | 
 
-#### Concurerende sites:
+#### Wat NL Films niche maakt:
+* Gebruikersvriendelijk en overzichtelijk
+* Data van zowel The Movie Database als van The International Movie Database (via OMDb).
+* Geen commerciële doeleinden.
+
+
+#### Zaken die alternatieve sites wél hebben:
 |         | NL Films           | Filmvandaag           | TMDb           | IMDb           |  
 | --- | --- | --- | --- | --- |  
 | Internationale films | ☒ | ☑ | ☑ | ☑ | 
@@ -121,12 +127,3 @@ https://www.tmdb.com:
   * Heeft links naar de series/films die te zien zijn op Netfilx
   * Geeft releases op dvd/bluray aan.
 
-
-#### Moeilijke delen:
-Veel code zal het werk complexer maken. De zaken waarvan we momenteel verwachten dat ze lastig zullen worden:
-* Andere gebruikers toevoegen a.d.h.v. gebruikersnaam
-* Vrienden berichten sturen
-* Filmtitels delen met een vriend
-* Films toevoegen aan een gezamenlijke lijst (update 2 lijsten)
-* Lijst met top gebruikers bekijken
-* Mensen volgen
