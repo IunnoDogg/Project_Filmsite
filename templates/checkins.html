@@ -25,14 +25,14 @@ grid {
 }
 </style>
 
-<center><h2>Check-ins</h2></center>
+<center><h2>Mijn check-ins</h2></center>
 <hr>
 
 <div class="grid">
     <form action="#" method="post">
-      <!--{% for favoriet in favorieten %}-->
-      <button class="favoriet standaard" text-align="center" style="width:300px;" name="#" value="#" type="submit"><img src="#"></img><p></p></button>
-      <!--{% endfor %}-->
+      {% for checkin in checkins %}
+      <button class="favoriet standaard" text-align="center" style="width:300px;" name="tmdb_id" value="{{checkin.film_id}}" type="submit"><img src="http://image.tmdb.org/t/p/w45{{checkin.afbeelding}}"></img><p>{{checkin.titel}}</p></button>
+      {% endfor %}
     </form>
 </div>
 {% endblock %}

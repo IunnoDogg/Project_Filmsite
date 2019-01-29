@@ -40,59 +40,315 @@
     <div id="linkerkolom">
       <p>
         <img src="http://image.tmdb.org/t/p/w185{{tmdb.poster_path}}" class="homepage_poster">
-        <form action="/addfavorite" method="post">
+        {% if alfavo != True and alcheckin != True %}
+        <div id="optiesContainer">
           <div class="form-group">
-            <div class="col-sm-12 controls">
-              {% if alfavo != True %}
-              <p align="center">
-                <button class="btn btn-outline-success" id="{{tmdb.id}}" type="submit" name="favorieten" value="{{tmdb.id}}"><i class="fa fa-plus" aria-hidden="true"></i> Favoriet</button>
-              </p>
-              {% endif %}
-            </div>
+            <p align="center">
+              <button class="btn btn-outline-success"  type="button" name="voeg" value="#">Voeg toe aan <i class="fa fa-caret-down" aria-hidden="true"></i></button>
+            </p>
           </div>
-        </form>
-        <form action="/removefavorite" method="post">
-          <div class="form-group">
-            <div class="col-sm-12 controls">
-              {% if alfavo == True %}
+        </div>
+        <div id="buttonsContainer" style="display:none;">
+          <form action="/addfavorite" method="post">
+            <div class="form-group">
               <p align="center">
-                <button class="btn btn-outline-danger" id="{{tmdb.id}}" type="submit" name="geenfavo" value="{{tmdb.id}}">Verwijder uit favorieten</button>
+                <button class="btn btn-outline-primary" id="{{tmdb.id}}" type="submit" name="favorieten" value="{{tmdb.id}}">Favorieten</button>
               </p>
-              {% endif %}
             </div>
-          </div>
-        </form>
-        <form action="/tipvriend" method="post">
-          <p align="center">
-            <div class="dropdown">
-              <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Tip een vriend
-              </button>
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <form class="dropdown-menu p-4">
-                  <div class="form-group">
-                    <center>
-                      <label for="exampleDropdownFormPassword2"><b>Gebruikersnaam</b></label>
-                      <input type="text" class="form-control" name="tipvriend" placeholder="Gebruikersnaam">
-                    </center>
-                  </div>
-                  <center>
-                    <button type="submit" class="btn btn-primary" name="buttonvriend" value="{{tmdb.id}}" >Tip vriend!</button>
-                  </center>
-                </form>
+          </form>
+          <form action="/addcheckins" method="post">
+            <div class="form-group">
+              <div class="col-sm-12 controls">
+                <p align="center">
+                  <button class="btn btn-outline-dark" type="submit" name="favorieten" value="{{tmdb.id}}">Check-ins</button>
+                </p>
               </div>
             </div>
+          </form>
+          <div id="lijstenContainer">
+            <center><button type="button" name="click2" class="btn btn-outline-secondary">Lijsten <i class="fa fa-caret-down" aria-hidden="true"></i></button></center>
+          </div>
+          <form action="#" method="post">
+            <p>
+              <div id="lijstennContainer" style="display:none;">
+                <center>
+                  <label for="action"></label>
+                  <select name="tipvriend" id="action">
+                    {% for lijst in lijsten %}
+                    <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                    {% endfor %}
+                    {% for lijst in lijsten2 %}
+                    <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                    {% endfor %}
+                    {% for lijst in lijsten3 %}
+                    <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                    {% endfor %}
+                  </select>
+                  <button type="submit" class="btn btn-outline-info btn-sm" name="buttonvriend" value="{{tmdb.id}}">Voeg toe</button>
+                </center>
+              </div>
+            </p>
+          </form>
+        </div>
+        <div id="buttonContainer">
+          <center><button type="button" name="click" class="btn btn-outline-info">Tip vriend</button></center>
+        </div>
+        <form action="/tipvriend" method="post">
+            <p>
+              <div id="lijstContainer" style="display:none;">
+                <center>
+                  <label for="action"></label>
+                  <select name="tipvriend" id="action">
+                    {% for vriend in vrienden %}
+                    {% if a > 0 %}
+                    <option value="{{vriend.van}}" name="tipvriend">{{vriend.van}}</option>
+                    {% endif %}
+                    {% endfor %}
+                    {% for vriend in vrienden1 %}
+                    {% if b > 0 %}
+                    <option value="{{vriend.naar}}" name="tipvriend">{{vriend.naar}}</option>
+                    {% endif %}
+                    {% endfor %}
+                  </select>
+                  <button type="submit" class="btn btn-outline-secondary btn-sm" name="buttonvriend" value="{{tmdb.id}}">Tip</button>
+                </center>
+              </div>
+            </p>
+          </form>
+        {% endif %}
 
+        {% if alfavo == True and alcheckin != True %}
+        <form action="/removefavorite" method="post">
+          <div class="form-group">
+            <p align="center">
+              <button class="btn btn-outline-danger" id="{{tmdb.id}}" type="submit" name="geenfavo" value="{{tmdb.id}}"><i class="fa fa-trash-o fa-fw"></i> Verwijder uit favorieten</button>
+            </p>
+          </div>
+        </form>
+        <div id="optiesContainer">
+          <div class="form-group">
+            <p align="center">
+              <button class="btn btn-outline-success"  type="button" name="voeg" value="#">Voeg toe aan <i class="fa fa-caret-down" aria-hidden="true"></i></button>
+            </p>
+          </div>
+        </div>
+        <div id="buttonsContainer" style="display:none;">
+          <form action="/addcheckins" method="post">
+            <div class="form-group">
+              <div class="col-sm-12 controls">
+                <p align="center">
+                  <button class="btn btn-outline-dark" type="submit" name="favorieten" value="{{tmdb.id}}">Check-ins</button>
+                </p>
+              </div>
+            </div>
+          </form>
+          <div id="lijstenContainer">
+            <center><button type="button" name="click2" class="btn btn-outline-secondary">Lijsten <i class="fa fa-caret-down" aria-hidden="true"></i></button></center>
+          </div>
+          <form action="#" method="post">
+            <p>
+              <div id="lijstennContainer" style="display:none;">
+                <center>
+                  <label for="action"></label>
+                  <select name="tipvriend" id="action">
+                    {% for lijst in lijsten %}
+                    <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                    {% endfor %}
+                    {% for lijst in lijsten2 %}
+                    <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                    {% endfor %}
+                    {% for lijst in lijsten3 %}
+                    <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                    {% endfor %}
+                  </select>
+                  <button type="submit" class="btn btn-outline-secondary btn-sm" name="buttonvriend" value="{{tmdb.id}}">Voeg toe</button>
+                </center>
+              </div>
+            </p>
+          </form>
+        </div>
+        <div id="buttonContainer">
+          <center><button type="button" name="click" class="btn btn-outline-info">Tip vriend</button></center>
+        </div>
+        <form action="/tipvriend" method="post">
+            <p>
+              <div id="lijstContainer" style="display:none;">
+                <center>
+                  <label for="action"></label>
+                  <select name="tipvriend" id="action">
+                    {% for vriend in vrienden %}
+                    {% if a > 0 %}
+                    <option value="{{vriend.van}}" name="tipvriend">{{vriend.van}}</option>
+                    {% endif %}
+                    {% endfor %}
+                    {% for vriend in vrienden1 %}
+                    {% if b > 0 %}
+                    <option value="{{vriend.naar}}" name="tipvriend">{{vriend.naar}}</option>
+                    {% endif %}
+                    {% endfor %}
+                  </select>
+                  <button type="submit" class="btn btn-outline-info btn-sm" name="buttonvriend" value="{{tmdb.id}}">Tip</button>
+                </center>
+              </div>
+            </p>
+          </form>
+          {% endif %}
 
-            <!--    {% for vriend in vrienden %}-->
-            <!--    <a class="dropdown-item" type="submit">{{vriend.van}}</a>-->
-            <!--    {% endfor %}-->
-            <!--  </div>-->
-            <!--</div>-->
-    <!--      </p>-->
-    <!--    </form>-->
-      </p>
-    </div>
+          {% if alfavo != True and alcheckin == True %}
+          <form action="/removecheckins" method="post">
+            <div class="form-group">
+              <div class="col-sm-12 controls">
+                <p align="center">
+                  <button class="btn btn-outline-danger" type="submit" name="geencheckin" value="{{tmdb.id}}"><i class="fa fa-trash-o fa-fw"></i> Verwijder check-in</button>
+                </p>
+              </div>
+            </div>
+          </form>
+          <div id="optiesContainer">
+            <div class="form-group">
+              <p align="center">
+                <button class="btn btn-outline-success"  type="button" name="voeg" value="#">Voeg toe aan <i class="fa fa-caret-down" aria-hidden="true"></i></button>
+              </p>
+            </div>
+          </div>
+          <div id="buttonsContainer" style="display:none;">
+            <form action="/addfavorite" method="post">
+              <div class="form-group">
+                <p align="center">
+                  <button class="btn btn-outline-primary" id="{{tmdb.id}}" type="submit" name="favorieten" value="{{tmdb.id}}">Favorieten</button>
+                </p>
+              </div>
+            </form>
+            <div id="lijstenContainer">
+              <center><button type="button" name="click2" class="btn btn-outline-secondary">Lijsten <i class="fa fa-caret-down" aria-hidden="true"></i></button></center>
+            </div>
+            <form action="#" method="post">
+              <p>
+                <div id="lijstennContainer" style="display:none;">
+                  <center>
+                    <label for="action"></label>
+                    <select name="tipvriend" id="action">
+                      {% for lijst in lijsten %}
+                      <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                      {% endfor %}
+                      {% for lijst in lijsten2 %}
+                      <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                      {% endfor %}
+                      {% for lijst in lijsten3 %}
+                      <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                      {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-outline-secondary btn-sm" name="buttonvriend" value="{{tmdb.id}}">Voeg toe</button>
+                  </center>
+                </div>
+              </p>
+            </form>
+          </div>
+          <div id="buttonContainer">
+            <center><button type="button" name="click" class="btn btn-outline-info">Tip vriend</button></center>
+          </div>
+          <form action="/tipvriend" method="post">
+              <p>
+                <div id="lijstContainer" style="display:none;">
+                  <center>
+                    <label for="action"></label>
+                    <select name="tipvriend" id="action">
+                      {% for vriend in vrienden %}
+                      {% if a > 0 %}
+                      <option value="{{vriend.van}}" name="tipvriend">{{vriend.van}}</option>
+                      {% endif %}
+                      {% endfor %}
+                      {% for vriend in vrienden1 %}
+                      {% if b > 0 %}
+                      <option value="{{vriend.naar}}" name="tipvriend">{{vriend.naar}}</option>
+                      {% endif %}
+                      {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-outline-info btn-sm" name="buttonvriend" value="{{tmdb.id}}">Tip</button>
+                  </center>
+                </div>
+              </p>
+            </form>
+            {% endif %}
+
+            {% if alfavo == True and alcheckin == True %}
+            <form action="/removefavorite" method="post">
+              <div class="form-group">
+                <p align="center">
+                  <button class="btn btn-outline-danger" id="{{tmdb.id}}" type="submit" name="geenfavo" value="{{tmdb.id}}"><i class="fa fa-trash-o fa-fw"></i> Verwijder uit favorieten</button>
+                </p>
+              </div>
+            </form>
+            <form action="/removecheckins" method="post">
+              <div class="form-group">
+                <div class="col-sm-12 controls">
+                  <p align="center">
+                    <button class="btn btn-outline-danger" type="submit" name="geencheckin" value="{{tmdb.id}}"><i class="fa fa-trash-o fa-fw"></i> Verwijder check-in</button>
+                  </p>
+                </div>
+              </div>
+            </form>
+            <div id="optiesContainer">
+              <div class="form-group">
+                <p align="center">
+                  <button class="btn btn-outline-success"  type="button" name="voeg" value="#">Voeg toe aan <i class="fa fa-caret-down" aria-hidden="true"></i></button>
+                </p>
+              </div>
+            </div>
+            <div id="buttonsContainer" style="display:none;">
+              <div id="lijstenContainer">
+                <center><button type="button" name="click2" class="btn btn-outline-secondary">Lijsten <i class="fa fa-caret-down" aria-hidden="true"></i></button></center>
+              </div>
+              <form action="#" method="post">
+                <p>
+                  <div id="lijstennContainer" style="display:none;">
+                    <center>
+                      <label for="action"></label>
+                      <select name="tipvriend" id="action">
+                        {% for lijst in lijsten %}
+                        <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                        {% endfor %}
+                        {% for lijst in lijsten2 %}
+                        <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                        {% endfor %}
+                        {% for lijst in lijsten3 %}
+                        <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                        {% endfor %}
+                      </select>
+                      <button type="submit" class="btn btn-outline-secondary btn-sm" name="buttonvriend" value="{{tmdb.id}}">Voeg toe</button>
+                    </center>
+                  </div>
+                </p>
+              </form>
+            </div>
+            <div id="buttonContainer">
+              <center><button type="button" name="click" class="btn btn-outline-info">Tip vriend</button></center>
+            </div>
+            <form action="/tipvriend" method="post">
+                <p>
+                  <div id="lijstContainer" style="display:none;">
+                    <center>
+                      <label for="action"></label>
+                      <select name="tipvriend" id="action">
+                        {% for vriend in vrienden %}
+                        {% if a > 0 %}
+                        <option value="{{vriend.van}}" name="tipvriend">{{vriend.van}}</option>
+                        {% endif %}
+                        {% endfor %}
+                        {% for vriend in vrienden1 %}
+                        {% if b > 0 %}
+                        <option value="{{vriend.naar}}" name="tipvriend">{{vriend.naar}}</option>
+                        {% endif %}
+                        {% endfor %}
+                      </select>
+                      <button type="submit" class="btn btn-outline-info btn-sm" name="buttonvriend" value="{{tmdb.id}}">Tip</button>
+                    </center>
+                  </div>
+                </p>
+              </form>
+              {% endif %}
+
+      </div>
       <div id="rechterkolom">
 
       {# Geen OMDb info gevonden #}
@@ -129,6 +385,29 @@
 
       </div>
     </div>
+  </div>
   </hr>
+
+<script>
+$(document).ready(function(){
+  $("[name=voeg]").click(function(){
+    $("#buttonsContainer").toggle();
+  });
+});
+
+$(document).ready(function(){
+  $("[name=click]").click(function(){
+    $("#lijstContainer").toggle();
+    $("#buttonContainer").toggle();
+  });
+});
+
+$(document).ready(function(){
+  $("[name=click2]").click(function(){
+    $("#lijstenContainer").toggle();
+    $("#lijstennContainer").toggle();
+  });
+});
+</script>
 {% endblock %}
 

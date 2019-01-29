@@ -497,13 +497,37 @@ def filminformatie():
         tipslengte=tipslength()
         totaal = tipslengte + lengte
 
-        vrienden = db.execute("SELECT van FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd",
+        vrienden = db.execute("SELECT * FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd",
                            naar=gebruikersnaam, geaccepteerd="ja")
+
+        vrienden1 = db.execute("SELECT * FROM verzoeken WHERE van=:van AND geaccepteerd=:geaccepteerd",
+                           van=gebruikersnaam, geaccepteerd="ja")
+
+        if vrienden:
+            a = len(vrienden)
+
+        else:
+            a = 0
+
+        if vrienden1:
+            b = len(vrienden1)
+
+        else:
+            b = 0
 
         favorieten = db.execute("SELECT film_id FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
         alfavo = any([favoriet['film_id'] == tmdb_id for favoriet in favorieten])
 
-        return render_template("filminformatie.html", tmdb=tmdb_response, omdb=omdb_response, alfavo=alfavo, lengte=lengte, tipslengte=tipslengte, totaal=totaal, vrienden=vrienden)
+        lijsten = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gez_lijst IS NULL", gebruiker=gebruikersnaam)
+        lijsten2 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker=:gebruiker", gebruiker=gebruikersnaam)
+        lijsten3 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker2=:gebruiker2", gebruiker2=gebruikersnaam)
+
+        checkins = db.execute("SELECT film_id FROM checkins WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
+        alcheckin = any([checkin['film_id'] == tmdb_id for checkin in checkins])
+
+        return render_template("filminformatie.html", tmdb=tmdb_response, omdb=omdb_response, alfavo=alfavo, lengte=lengte,
+        tipslengte=tipslengte, totaal=totaal, vrienden=vrienden, vrienden1=vrienden1, a=a, b=b, lijsten=lijsten,
+        lijsten2=lijsten2, lijsten3=lijsten3, alcheckin=alcheckin)
 
 @app.route("/filminfo_non", methods=["GET", "POST"])
 def filminformatie_non():
@@ -918,7 +942,9 @@ def checkins():
     tipslengte=tipslength()
     totaal = tipslengte + lengte
 
-    return render_template("checkins.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
+    checkins = db.execute("SELECT * FROM checkins WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
+
+    return render_template("checkins.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal, checkins=checkins)
 
 @app.route("/tipvriend", methods=["POST"])
 @login_required
@@ -1178,3 +1204,75 @@ def gezlijst():
                             gebruiker2=gebruikersnaam, gebruiker=vriend, lijstnaam=lijstnaam)
 
         return render_template("gezlijst.html", lengte=lengte, tipslengte=tipslengte, lijsten1=lijsten1, lijsten2=lijsten2)
+
+@app.route("/addcheckins", methods=["POST"])
+@login_required
+def addcheckins():
+
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
+
+    if request.method == "POST":
+
+        gebruikersnaam = gebruiker()
+
+        tmdb_id = request.form.get("favorieten")
+
+        # Alle informatie ophalen voor zoekresultaat (TMDb)
+        from urllib.request import urlopen
+        tmdb_url = str( "https://api.themoviedb.org/3/movie/" + tmdb_id + "?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl")
+        tmdb_response = json.loads(str((requests.get(tmdb_url).content).decode('UTF-8')))
+
+        # Als er geen IMDb id genoemd wordt
+        if tmdb_response["imdb_id"] == None or "tt" not in tmdb_response["imdb_id"]:
+            omdb_response = None
+
+        # Alle informatie ophalen voor zoekresultaat (OMDb)
+        else:
+            omdb_url = "http://www.omdbapi.com/?i=" + tmdb_response["imdb_id"] + "&apikey=be77e5d"
+            omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
+
+        checkins = db.execute("SELECT film_id FROM checkins WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
+
+        db.execute("INSERT INTO checkins (gebruiker, film_id, titel, afbeelding) VALUES (:gebruiker, :film_id, :titel, :afbeelding)",
+                    gebruiker=gebruikersnaam, film_id=tmdb_id, titel=tmdb_response["original_title"], afbeelding=tmdb_response["poster_path"])
+
+        return render_template("addcheckins.html", tmdb=tmdb_response, omdb=omdb_response, checkins=checkins, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
+
+@app.route("/removecheckins", methods=["POST"])
+@login_required
+def removecheckins():
+
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
+
+    if request.method == "POST":
+
+        gebruikersnaam = gebruiker()
+
+        tmdb_id = request.form.get("geencheckin")
+
+        # Alle informatie ophalen voor zoekresultaat (TMDb)
+        from urllib.request import urlopen
+        tmdb_url = str( "https://api.themoviedb.org/3/movie/" + tmdb_id + "?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl")
+        tmdb_response = json.loads(str((requests.get(tmdb_url).content).decode('UTF-8')))
+
+        # Als er geen IMDb id genoemd wordt
+        if tmdb_response["imdb_id"] == None or "tt" not in tmdb_response["imdb_id"]:
+            omdb_response = None
+
+        # Alle informatie ophalen voor zoekresultaat (OMDb)
+        else:
+            omdb_url = "http://www.omdbapi.com/?i=" + tmdb_response["imdb_id"] + "&apikey=be77e5d"
+            omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
+
+        db.execute("DELETE FROM checkins WHERE gebruiker=:gebruiker AND film_id=:film_id",
+                    gebruiker=gebruikersnaam, film_id=tmdb_id)
+
+        return render_template("removecheckins.html", tmdb=tmdb_response, omdb=omdb_response, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
