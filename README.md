@@ -97,7 +97,7 @@ Er moet gezocht kunnen worden naar een specifieke film. Wanneer de film gevonden
 | [Bootsnipp](https://bootsnipp.com/) | Code snippets for Bootstrap HTML/CSS/JS framework      | 
 
 
-#### Wat andere films wél doen.
+#### Onze alternatieve sites & wat zij wél doen en NL Films niet.
 
 |         | NL Films           | [Filmvandaag](https://www.filmvandaag.nl)           | [TMDb](https://www.tmdb.com)           | [IMDb](https://www.imdb.com)           |  
 | --- | --- | --- | --- | --- |  
