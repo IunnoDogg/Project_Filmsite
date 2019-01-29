@@ -64,7 +64,7 @@ Nederlandse (NL) Films heeft als streven liefhebbers van Nederlandse film gemakk
     * Bekijk de regisseur(s), schrijver(s) en hoofdrolspelers
 
 * Eventueel in de toekomst:
-  * Delen via Social Media.
+  * Dealternatievelen via Social Media.
   * Lijst met top gebruikers bekijken
   * Vrienden berichten sturen
   * Films toevoegen aan een gezamenlijke lijst (update 2 lijsten)
@@ -97,7 +97,7 @@ Er moet gezocht kunnen worden naar een specifieke film. Wanneer de film gevonden
 | [Bootsnipp](https://bootsnipp.com/) | Code snippets for Bootstrap HTML/CSS/JS framework      | 
 
 
-#### Onze alternatieve sites & wat zij wél doen en NL Films niet.
+#### Alternatieve sites: wat doen zij wél wat NL Films niet doet?.
 
 |         | NL Films           | [Filmvandaag](https://www.filmvandaag.nl)           | [TMDb](https://www.tmdb.com)           | [IMDb](https://www.imdb.com)           |  
 | --- | --- | --- | --- | --- |  
