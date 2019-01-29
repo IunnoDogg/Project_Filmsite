@@ -894,17 +894,6 @@ def legehistorie():
 
     return render_template("legehistorie.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
-@app.route("/mijnkijklijst", methods=["GET", "POST"])
-@login_required
-def mijnkijklijst():
-    gebruikersnaam = gebruiker()
-    verzoeken = verzoek()
-    lengte = lengte_vv()
-    tipslengte=tipslength()
-    totaal = tipslengte + lengte
-
-    return render_template("mijnkijklijst.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
-
 @app.route("/mijnlijsten", methods=["GET", "POST"])
 @login_required
 def mijnlijsten():
@@ -1217,8 +1206,6 @@ def gezlijst():
         lijsten2 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam AND nieuwe_lijst IS NULL",
                             gebruiker2=gebruikersnaam, gebruiker=vriend, lijstnaam=lijstnaam)
 
-        print(lijsten1)
-        print(lijsten2)
         return render_template("gezlijst.html", lengte=lengte, tipslengte=tipslengte, lijsten1=lijsten1, lijsten2=lijsten2, lijstnaam=lijstnaam, vriend=vriend)
 
 @app.route("/addcheckins", methods=["POST"])
