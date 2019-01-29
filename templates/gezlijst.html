@@ -38,23 +38,38 @@ grid {
 
 </style>
 
+{% if lijsten1 != [] or lijsten2 != [] %}
 {% for lijst in lijsten1 %}
-<div style="float: left"></div>
-<div style="float: right"><h5>Gezamenlijke lijst met: <button type="submit" class="btn btn-outline-info btn-sm" name="submit" value="submit">{{lijst.gebruiker}}</button></h5></div>
-<div style="margin: 0 auto; width: 100px;"><h4>Lijst: {{lijst.lijstnaam}}</h4></div>
+<center>
+  <h2>
+    Gezamenlijke lijst "{{lijst.lijstnaam}}" met: <button type="submit" class="btn btn-outline-info btn-sm" name="submit" value="{{lijst.gebruiker2}}">{{lijst.gebruiker2}}</button>
+  </h2>
+</center>
 {% endfor %}
 {% for lijst in lijsten2 %}
-<div style="float: left"></div>
-<div style="float: right"><h5>Gezamenlijke lijst met: <button type="submit" class="btn btn-outline-info btn-sm" name="submit" value="submit">{{lijst.gebruiker}}</button></h5></div>
-<div style="margin: 0 auto; width: 100px;"><h4>Lijst: {{lijst.lijstnaam}}</h4></div>
+<center>
+  <h2>
+    Gezamenlijke lijst "{{lijst.lijstnaam}}" met: <button type="submit" class="btn btn-outline-info btn-sm" name="submit" value="{{lijst.gebruiker}}">{{lijst.gebruiker}}</button>
+  </h2>
+</center>
 {% endfor %}
+{% else %}
+<center>
+  <h2>
+    Gezamenlijke lijst "{{lijstnaam}}" met: <button type="submit" class="btn btn-outline-info btn-sm" name="submit" value="{{vriend}}">{{vriend}}</button>
+  </h2>
+</center>
+{% endif %}
 
 <hr>
-<!--<div class="grid">-->
-<!--    <form action="/filminfo" method="post">-->
-<!--      {% for film in historie %}-->
-<!--      <button class="favoriet standaard" text-align="center" style="width:300px;" name="tmdb_id" value="{{film.film_id}}" type="submit"><img src="http://image.tmdb.org/t/p/w45{{film.afbeelding}}"></img><p>{{film.titel}}</p></button>-->
-<!--      {% endfor %}-->
-<!--    </form>-->
-<!--</div>-->
+<div class="grid">
+    <form action="/filminfo" method="post">
+      {% for lijst in lijsten1 %}
+      <button class="favoriet standaard" text-align="center" style="width:300px;" name="tmdb_id" value="{{lijst.film_id}}" type="submit"><img src="http://image.tmdb.org/t/p/w45{{lijst.afbeelding}}"></img><p>{{lijst.titel}}</p></button>
+      {% endfor %}
+      {% for lijst in lijsten2 %}
+      <button class="favoriet standaard" text-align="center" style="width:300px;" name="tmdb_id" value="{{lijst.film_id}}" type="submit"><img src="http://image.tmdb.org/t/p/w45{{lijst.afbeelding}}"></img><p>{{lijst.titel}}</p></button>
+      {% endfor %}
+    </form>
+</div>
 {% endblock %}

@@ -68,23 +68,23 @@
           <div id="lijstenContainer">
             <center><button type="button" name="click2" class="btn btn-outline-secondary">Lijsten <i class="fa fa-caret-down" aria-hidden="true"></i></button></center>
           </div>
-          <form action="#" method="post">
+          <form action="/addtolist" method="post">
             <p>
               <div id="lijstennContainer" style="display:none;">
                 <center>
                   <label for="action"></label>
-                  <select name="tipvriend" id="action">
+                  <select name="lijst" id="action">
                     {% for lijst in lijsten %}
-                    <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                    <option value="{{lijst.lijstnaam}}" name="lijst">{{lijst.lijstnaam}}</option>
                     {% endfor %}
                     {% for lijst in lijsten2 %}
-                    <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                    <option value="{{lijst.lijstnaam}}|{{lijst.gebruiker2}}" name="lijst">{{lijst.lijstnaam}}</option>
                     {% endfor %}
                     {% for lijst in lijsten3 %}
-                    <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                    <option value="{{lijst.lijstnaam}}|{{lijst.gebruiker}}" name="lijst">{{lijst.lijstnaam}}</option>
                     {% endfor %}
                   </select>
-                  <button type="submit" class="btn btn-outline-info btn-sm" name="buttonvriend" value="{{tmdb.id}}">Voeg toe</button>
+                  <button type="submit" class="btn btn-outline-info btn-sm" name="buttonfilm" value="{{tmdb.id}}">Voeg toe</button>
                 </center>
               </div>
             </p>
@@ -145,23 +145,23 @@
           <div id="lijstenContainer">
             <center><button type="button" name="click2" class="btn btn-outline-secondary">Lijsten <i class="fa fa-caret-down" aria-hidden="true"></i></button></center>
           </div>
-          <form action="#" method="post">
+          <form action="/addtolist" method="post">
             <p>
               <div id="lijstennContainer" style="display:none;">
                 <center>
                   <label for="action"></label>
-                  <select name="tipvriend" id="action">
+                  <select name="lijst" id="action">
                     {% for lijst in lijsten %}
-                    <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                    <option value="{{lijst.lijstnaam}}" name="lijst">{{lijst.lijstnaam}}</option>
                     {% endfor %}
                     {% for lijst in lijsten2 %}
-                    <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                    <option value="{{lijst.lijstnaam}}|{{lijst.gebruiker2}}" name="lijst">{{lijst.lijstnaam}}</option>
                     {% endfor %}
                     {% for lijst in lijsten3 %}
-                    <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                    <option value="{{lijst.lijstnaam}}|{{lijst.gebruiker}}" name="lijst">{{lijst.lijstnaam}}</option>
                     {% endfor %}
                   </select>
-                  <button type="submit" class="btn btn-outline-secondary btn-sm" name="buttonvriend" value="{{tmdb.id}}">Voeg toe</button>
+                  <button type="submit" class="btn btn-outline-info btn-sm" name="buttonfilm" value="{{tmdb.id}}">Voeg toe</button>
                 </center>
               </div>
             </p>
@@ -222,23 +222,23 @@
             <div id="lijstenContainer">
               <center><button type="button" name="click2" class="btn btn-outline-secondary">Lijsten <i class="fa fa-caret-down" aria-hidden="true"></i></button></center>
             </div>
-            <form action="#" method="post">
+            <form action="/addtolist" method="post">
               <p>
                 <div id="lijstennContainer" style="display:none;">
                   <center>
                     <label for="action"></label>
-                    <select name="tipvriend" id="action">
+                    <select name="lijst" id="action">
                       {% for lijst in lijsten %}
-                      <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                      <option value="{{lijst.lijstnaam}}" name="lijst">{{lijst.lijstnaam}}</option>
                       {% endfor %}
                       {% for lijst in lijsten2 %}
-                      <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                      <option value="{{lijst.lijstnaam}}|{{lijst.gebruiker2}}" name="lijst">{{lijst.lijstnaam}}</option>
                       {% endfor %}
                       {% for lijst in lijsten3 %}
-                      <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                      <option value="{{lijst.lijstnaam}}|{{lijst.gebruiker}}" name="lijst">{{lijst.lijstnaam}}</option>
                       {% endfor %}
                     </select>
-                    <button type="submit" class="btn btn-outline-secondary btn-sm" name="buttonvriend" value="{{tmdb.id}}">Voeg toe</button>
+                    <button type="submit" class="btn btn-outline-info btn-sm" name="buttonfilm" value="{{tmdb.id}}">Voeg toe</button>
                   </center>
                 </div>
               </p>
@@ -299,23 +299,23 @@
               <div id="lijstenContainer">
                 <center><button type="button" name="click2" class="btn btn-outline-secondary">Lijsten <i class="fa fa-caret-down" aria-hidden="true"></i></button></center>
               </div>
-              <form action="#" method="post">
+              <form action="/addtolist" method="post">
                 <p>
                   <div id="lijstennContainer" style="display:none;">
                     <center>
                       <label for="action"></label>
-                      <select name="tipvriend" id="action">
+                      <select name="lijst" id="action">
                         {% for lijst in lijsten %}
-                        <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                        <option value="{{lijst.lijstnaam}}" name="lijst">{{lijst.lijstnaam}}</option>
                         {% endfor %}
                         {% for lijst in lijsten2 %}
-                        <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                        <option value="{{lijst.lijstnaam}}|{{lijst.gebruiker2}}" name="lijst">{{lijst.lijstnaam}}</option>
                         {% endfor %}
                         {% for lijst in lijsten3 %}
-                        <option value="#" name="tipvriend">{{lijst.lijstnaam}}</option>
+                        <option value="{{lijst.lijstnaam}}|{{lijst.gebruiker}}" name="lijst">{{lijst.lijstnaam}}</option>
                         {% endfor %}
                       </select>
-                      <button type="submit" class="btn btn-outline-secondary btn-sm" name="buttonvriend" value="{{tmdb.id}}">Voeg toe</button>
+                      <button type="submit" class="btn btn-outline-info btn-sm" name="buttonfilm" value="{{tmdb.id}}">Voeg toe</button>
                     </center>
                   </div>
                 </p>

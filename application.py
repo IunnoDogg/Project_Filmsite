@@ -501,7 +501,7 @@ def filminformatie():
                            naar=gebruikersnaam, geaccepteerd="ja")
 
         vrienden1 = db.execute("SELECT * FROM verzoeken WHERE van=:van AND geaccepteerd=:geaccepteerd",
-                           van=gebruikersnaam, geaccepteerd="ja")
+                               van=gebruikersnaam, geaccepteerd="ja")
 
         if vrienden:
             a = len(vrienden)
@@ -518,9 +518,14 @@ def filminformatie():
         favorieten = db.execute("SELECT film_id FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
         alfavo = any([favoriet['film_id'] == tmdb_id for favoriet in favorieten])
 
-        lijsten = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gez_lijst IS NULL", gebruiker=gebruikersnaam)
-        lijsten2 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker=:gebruiker", gebruiker=gebruikersnaam)
-        lijsten3 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker2=:gebruiker2", gebruiker2=gebruikersnaam)
+        lijsten = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gez_lijst IS NULL AND nieuwe_lijst=:nieuwe_lijst",
+                              gebruiker=gebruikersnaam, nieuwe_lijst="ja")
+
+        lijsten2 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker=:gebruiker AND nieuwe_lijst=:nieuwe_lijst",
+                                gebruiker=gebruikersnaam, nieuwe_lijst="ja")
+
+        lijsten3 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker2=:gebruiker2 AND nieuwe_lijst=:nieuwe_lijst",
+                                gebruiker2=gebruikersnaam, nieuwe_lijst="ja")
 
         checkins = db.execute("SELECT film_id FROM checkins WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
         alcheckin = any([checkin['film_id'] == tmdb_id for checkin in checkins])
@@ -927,11 +932,15 @@ def mijnlijsten():
     else:
         b = 0
 
-    lijsten = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gez_lijst IS NULL", gebruiker=gebruikersnaam)
-    lijsten2 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker=:gebruiker", gebruiker=gebruikersnaam)
-    lijsten3 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker2=:gebruiker2", gebruiker2=gebruikersnaam)
+    lijsten = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gez_lijst IS NULL AND nieuwe_lijst=:nieuwe_lijst",
+                        gebruiker=gebruikersnaam, nieuwe_lijst="ja")
+    lijsten2 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker=:gebruiker AND nieuwe_lijst=:nieuwe_lijst",
+                        gebruiker=gebruikersnaam, nieuwe_lijst="ja")
+    lijsten3 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker2=:gebruiker2 AND nieuwe_lijst=:nieuwe_lijst",
+                        gebruiker2=gebruikersnaam, nieuwe_lijst="ja")
 
-    return render_template("mijnlijsten.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal, vrienden=vrienden, vrienden1=vrienden1, a=a, b=b, lijsten=lijsten, lijsten2=lijsten2, lijsten3=lijsten3)
+    return render_template("mijnlijsten.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal, vrienden=vrienden,
+                            vrienden1=vrienden1, a=a, b=b, lijsten=lijsten, lijsten2=lijsten2, lijsten3=lijsten3)
 
 @app.route("/checkins", methods=["GET", "POST"])
 @login_required
@@ -1110,6 +1119,7 @@ def lijstgemaakt():
         totaal = tipslengte + lengte
 
         lijstnaam = request.form.get("lijstnaam")
+        x = lijstnaam + "_" + gebruikersnaam
 
         check = db.execute("SELECT * FROM lijsten WHERE lijstnaam=:lijstnaam AND gebruiker=:gebruiker AND gebruiker2 IS NULL",
                             lijstnaam=lijstnaam, gebruiker=gebruikersnaam)
@@ -1118,8 +1128,8 @@ def lijstgemaakt():
             return apology(tekst)
 
         else:
-            db.execute("INSERT INTO lijsten (gebruiker, lijstnaam) VALUES (:gebruiker, :lijstnaam)",
-                    gebruiker=gebruikersnaam, lijstnaam=lijstnaam)
+            db.execute("INSERT INTO lijsten (gebruiker, lijstnaam, nieuwe_lijst) VALUES (:gebruiker, :lijstnaam, :nieuwe_lijst)",
+                    gebruiker=gebruikersnaam, lijstnaam=lijstnaam, nieuwe_lijst="ja")
 
         return render_template("lijstgemaakt.html", lengte=lengte, tipslengte=tipslengte, lijstnaam=lijstnaam)
 
@@ -1149,8 +1159,8 @@ def gezamenlijkelijstgemaakt():
                 return apology(tekst)
 
             else:
-                db.execute("INSERT INTO lijsten (gebruiker, lijstnaam, gebruiker2, gez_lijst) VALUES (:gebruiker, :lijstnaam, :gebruiker2, :gez_lijst)",
-                            gebruiker=gebruikersnaam, lijstnaam=lijstnaam, gebruiker2=vriend, gez_lijst="ja")
+                db.execute("INSERT INTO lijsten (gebruiker, lijstnaam, gebruiker2, gez_lijst, nieuwe_lijst) VALUES (:gebruiker, :lijstnaam, :gebruiker2, :gez_lijst, :nieuwe_lijst)",
+                            gebruiker=gebruikersnaam, lijstnaam=lijstnaam, gebruiker2=vriend, gez_lijst="ja", nieuwe_lijst="ja")
 
 
         if vriend2:
@@ -1165,8 +1175,8 @@ def gezamenlijkelijstgemaakt():
                 return apology(tekst)
 
             else:
-                db.execute("INSERT INTO lijsten (gebruiker, lijstnaam, gebruiker2, gez_lijst) VALUES (:gebruiker, :lijstnaam, :gebruiker2, :gez_lijst)",
-                            gebruiker=gebruikersnaam, lijstnaam=lijstnaam, gebruiker2=vriend2, gez_lijst="ja")
+                db.execute("INSERT INTO lijsten (gebruiker, lijstnaam, gebruiker2, gez_lijst, nieuwe_lijst) VALUES (:gebruiker, :lijstnaam, :gebruiker2, :gez_lijst, :nieuwe_lijst)",
+                            gebruiker=gebruikersnaam, lijstnaam=lijstnaam, gebruiker2=vriend2, gez_lijst="ja", nieuwe_lijst="ja")
 
         return render_template("gezamenlijkelijstgemaakt.html", lengte=lengte, tipslengte=tipslengte, lijstnaam=lijstnaam)
 
@@ -1180,9 +1190,11 @@ def lijst():
         tipslengte=tipslength()
         totaal = tipslengte + lengte
 
-        lijstnaam = request.form.get("button")
+        lijst = request.form.get("button")
+        lijstinfo = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND lijstnaam=:lijstnaam AND nieuwe_lijst IS NULL",
+                                gebruiker=gebruikersnaam, lijstnaam=lijst)
 
-        return render_template("lijst.html", lengte=lengte, tipslengte=tipslengte, lijstnaam=lijstnaam)
+        return render_template("lijst.html", lengte=lengte, tipslengte=tipslengte, lijst=lijst, lijstinfo=lijstinfo)
 
 @app.route("/gezlijst", methods=["POST"])
 @login_required
@@ -1196,14 +1208,18 @@ def gezlijst():
 
         lijstnaam = request.form.get("button")
         vriend = request.form.get("vriend")
+        print(lijstnaam)
+        print(vriend)
 
-        lijsten1 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam",
+        lijsten1 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam AND nieuwe_lijst IS NULL",
                             gebruiker=gebruikersnaam, gebruiker2=vriend, lijstnaam=lijstnaam)
 
-        lijsten2 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam",
+        lijsten2 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam AND nieuwe_lijst IS NULL",
                             gebruiker2=gebruikersnaam, gebruiker=vriend, lijstnaam=lijstnaam)
 
-        return render_template("gezlijst.html", lengte=lengte, tipslengte=tipslengte, lijsten1=lijsten1, lijsten2=lijsten2)
+        print(lijsten1)
+        print(lijsten2)
+        return render_template("gezlijst.html", lengte=lengte, tipslengte=tipslengte, lijsten1=lijsten1, lijsten2=lijsten2, lijstnaam=lijstnaam, vriend=vriend)
 
 @app.route("/addcheckins", methods=["POST"])
 @login_required
@@ -1276,3 +1292,84 @@ def removecheckins():
                     gebruiker=gebruikersnaam, film_id=tmdb_id)
 
         return render_template("removecheckins.html", tmdb=tmdb_response, omdb=omdb_response, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
+
+@app.route("/addtolist", methods=["POST"])
+@login_required
+def addtolist():
+    gebruikersnaam = gebruiker()
+    verzoeken = verzoek()
+    lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
+
+    if request.method == "POST":
+
+        tmdb_id = request.form.get("buttonfilm")
+        lijst = request.form.get("lijst")
+
+        # Alle informatie ophalen voor zoekresultaat (TMDb)
+        from urllib.request import urlopen
+        tmdb_url = str( "https://api.themoviedb.org/3/movie/" + tmdb_id + "?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl")
+        tmdb_response = json.loads(str((requests.get(tmdb_url).content).decode('UTF-8')))
+
+        # Als er geen IMDb id genoemd wordt
+        if tmdb_response["imdb_id"] == None or "tt" not in tmdb_response["imdb_id"]:
+            omdb_response = None
+
+        # Alle informatie ophalen voor zoekresultaat (OMDb)
+        else:
+            omdb_url = "http://www.omdbapi.com/?i=" + tmdb_response["imdb_id"] + "&apikey=be77e5d"
+            omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
+
+        lijstnaam = lijst.split('|')[0]
+        vriend = lijst.split('|')[1]
+
+        if not vriend:
+            lijstinfo = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND film_id=:film_id AND titel=:titel AND afbeelding=:afbeelding AND lijstnaam=:lijstnaam AND gez_lijst IS NULL AND nieuwe_lijst IS NULL",
+                                    gebruiker=gebruikersnaam, film_id=tmdb_id, titel=tmdb_response["original_title"],
+                                    afbeelding=tmdb_response["poster_path"], lijstnaam=lijstnaam)
+
+            if lijstinfo:
+                tekst = "Deze film staat al in je lijst: " + lijstnaam
+                return apology(tekst)
+
+            db.execute("INSERT INTO lijsten (gebruiker, film_id, titel, afbeelding, lijstnaam) VALUES (:gebruiker, :film_id, :titel, :afbeelding, :lijstnaam)",
+                        gebruiker=gebruikersnaam, film_id=tmdb_id, titel=tmdb_response["original_title"],
+                        afbeelding=tmdb_response["poster_path"], lijstnaam=lijstnaam)
+
+            return render_template("addtolist.html", tmdb=tmdb_response, omdb=omdb_response, lengte=lengte, tipslengte=tipslengte,
+                                    totaal=totaal, lijstnaam=lijstnaam)
+
+        else:
+            lijstinfo = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND film_id=:film_id AND titel=:titel AND afbeelding=:afbeelding AND lijstnaam=:lijstnaam AND gez_lijst IS NOT NULL AND nieuwe_lijst IS NULL AND gebruiker2=:gebruiker2",
+                                    gebruiker=gebruikersnaam, film_id=tmdb_id, titel=tmdb_response["original_title"],
+                                    afbeelding=tmdb_response["poster_path"], lijstnaam=lijstnaam, gebruiker2=vriend)
+
+            if lijstinfo:
+
+                tekst = "Deze film staat al in je gezamenlijke lijst: " + lijstnaam + "met:" + vriend
+                return apology(tekst)
+
+            if not lijstinfo:
+
+                lijstinfo = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND film_id=:film_id AND titel=:titel AND afbeelding=:afbeelding AND lijstnaam=:lijstnaam AND gez_lijst IS NOT NULL AND nieuwe_lijst IS NULL AND gebruiker2=:gebruiker2",
+                                        gebruiker=vriend, film_id=tmdb_id, titel=tmdb_response["original_title"],
+                                        afbeelding=tmdb_response["poster_path"], lijstnaam=lijstnaam, gebruiker2=gebruikersnaam)
+
+                if lijstinfo:
+                    tekst = "Deze film staat al in je gezamenlijke lijst: " + lijstnaam + "met:" + vriend
+                    return apology(tekst)
+
+                else:
+                    db.execute("INSERT INTO lijsten (gebruiker, film_id, gebruiker2, titel, afbeelding, lijstnaam) VALUES (:gebruiker, :film_id, :gebruiker2, :titel, :afbeelding, :lijstnaam)",
+                    gebruiker=gebruikersnaam, film_id=tmdb_id, titel=tmdb_response["original_title"],
+                    afbeelding=tmdb_response["poster_path"], lijstnaam=lijstnaam, gebruiker2=vriend)
+
+                    return render_template("addtolist.html", tmdb=tmdb_response, omdb=omdb_response, lengte=lengte, tipslengte=tipslengte,
+                                                totaal=totaal, lijstnaam=lijstnaam, vriend=vriend)
+
+
+
+
+
+

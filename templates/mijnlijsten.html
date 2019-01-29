@@ -96,7 +96,7 @@
   <tr>
     <td>{{lijst.lijstnaam}}</td>
     <td>
-      X
+      -
     </td>
     <form action="/lijst" method="post">
       <td>
@@ -113,8 +113,8 @@
   <tr>
     <td>{{lijst.lijstnaam}}</td>
     <td>
-      <form action="vriendinfo" method="post">
-      Gezamenlijke lijst met: <button class="anders primary" name="vriend1" type="submit" value="{{lijst.gebruiker}}">{{lijst.gebruiker}}</button>
+      <form action="/vriendinfo" method="post">
+      Gezamenlijke lijst met: <button class="anders primary" name="vriend1" type="submit" value="{{lijst.gebruiker2}}">{{lijst.gebruiker2}}</button>
     </form>
     </td>
     <form action="/gezlijst" method="post">
@@ -133,8 +133,8 @@
   <tr>
     <td>{{lijst.lijstnaam}}</td>
     <td>
-      <form action="vriendinfo" method="post">
-      Gezamenlijke lijst met: <button class="anders primary" name="vriend2" type="submit" value={{lijst.gebruiker2}}>{{lijst.gebruiker2}}</button>
+      <form action="/vriendinfo" method="post">
+      Gezamenlijke lijst met: <button class="anders primary" name="vriend2" type="submit" value={{lijst.gebruiker}}>{{lijst.gebruiker}}</button>
     </form>
     </td>
     <form action="/gezlijst" method="post">
