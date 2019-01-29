@@ -5,6 +5,50 @@
 {% endblock %}
 
 {% block main %}
-    <a>{{favorieten}}</a>
-    <a>{{favorieten1}}</a>
+<style type='text/css'>
+  p {
+    padding: 5px;
+  }
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  td, th {
+    border: 1px solid #dddddd;
+    text-align: center;
+    padding: 8px;
+  }
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  }
+</style>
+
+{% if vriend is not none %}
+<center><strong><h2>{{vriend}}</h2></strong></center>
+{% endif %}
+{% if profiel is not none %}
+<center><strong><h2>{{profiel}}</h2></strong></center>
+{% endif %}
+
+<left><strong><h4>Favorieten</h4></strong></left>
+<table>
+
+{% if favorieten != NULL %}
+
+<form action="/filminfo" method="post">
+{% for favoriet in favorieten %}
+    <tr>
+    <td width="20%"><button name="tmdb_id" value="{{favoriet.film_id}}" type="submit"><img style="height:auto; width:auto" src="http://image.tmdb.org/t/p/w45{{favoriet.afbeelding}}"/></button></td>
+    <td style="text-align:left" width="80%">{{favoriet.titel}}</td>
+
+    </tr>
+{% endfor %}
+</form>
+
+{% endif %}
+</table>
+
+
+
 {% endblock %}

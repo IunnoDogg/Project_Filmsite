@@ -42,11 +42,11 @@
   <tr>
     <td>{{vriend.van}}</td>
     <form action="/vriendinfo" method="post">
-      <td> <button type="submit" name="profiel" value="{{vriend.van}}" class="btn btn-outline-primary">Link naar profiel</button> </td>
+      <td> <button type="submit" name="profiel" value="{{vriend.van}}" class="btn btn-outline-primary"><i class="fa fa-user fa-fw"></i> Link naar profiel</button> </td>
     </form>
     <td>{{vriend.datum}}</td>
     <form action="/verwijdervriendredirect" method="post">
-      <td><button type="submit" name="verwijder" value="{{vriend.van}}" class="btn btn-outline-danger">Verwijder {{vriend.van}}</button></td>
+      <td><button type="submit" name="verwijder" value="{{vriend.van}}" class="btn btn-outline-danger"><i class="fa fa-trash-o fa-fw"></i> Verwijder {{vriend.van}}</button></td>
     </form>
   </tr>
 {% endif %}
@@ -57,32 +57,14 @@
   <tr>
     <td>{{vriend.naar}}</td>
     <form action="/vriendinfo" method="post">
-      <td> <button type="submit" name="profiel1" value="{{vriend.naar}}" class="btn btn-outline-primary">Link naar profiel</button> </td>
+      <td> <button type="submit" name="profiel1" value="{{vriend.naar}}" class="btn btn-outline-primary"><i class="fa fa-user fa-fw"></i> Link naar profiel</button> </td>
     </form>
     <td>{{vriend.datum}}</td>
     <form action="/verwijdervriendredirect" method="post">
-      <td><button type="submit" name="verwijder1" value="{{vriend.naar}}" class="btn btn-outline-danger">Verwijder {{vriend.naar}}</button></td>
+      <td><button type="submit" name="verwijder1" value="{{vriend.naar}}" class="btn btn-outline-danger"><i class="fa fa-trash-o fa-fw"></i> Verwijder {{vriend.naar}}</button></td>
     </form>
   </tr>
 {% endif %}
 {% endfor %}
 </table>
-
-<!--<br>-->
-
-<!--{% for vriend in vrienden %}-->
-<!--{% if a > 0 %}-->
-<!--<table>-->
-<!--  <tr>-->
-<!--    <th>{{vriend.van}}</th>-->
-<!--    <th>Vrienden sinds</th>-->
-<!--  </tr>-->
-<!--  <tr>-->
-<!--    <td>x</td>-->
-<!--    <td>{{vriend.datum}}</td>-->
-<!--  </tr>-->
-<!--</table>-->
-<!--<br>-->
-<!--{% endif %}-->
-<!--{% endfor %}-->
 {% endblock %}

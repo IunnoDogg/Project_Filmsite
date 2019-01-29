@@ -1,13 +1,20 @@
-import csv
-import urllib.request
-
+import urllib.request, requests, json, urllib, datetime
 from flask import redirect, render_template, request, session
 from functools import wraps
+from urllib.request import urlopen
+
+year = str(datetime.date.today().year)
+
+# Om urls te vereenvoudigen
+tmdb_info = "https://api.themoviedb.org/3/movie/"
+tmdb_search = "https://api.themoviedb.org/3/search/movie?"
+tmdb_key = "api_key=9c226374f10b2dcd656cf7c348ee760a"
+tmdb_no_adult = "&include_adult=false"
+tmdb_nl = "&language=nl"
 
 def login_required(f):
     """
     Decorate routes to require login.
-
     http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
     """
     @wraps(f)
@@ -17,82 +24,39 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def results_per_page(searchterm, pagenr):
+    '''
+    Return all results for an individual searchresults page.
+    '''
+    url = tmdb_search + tmdb_key + tmdb_nl + "&query=" + searchterm + tmdb_no_adult + "&page=" + str(pagenr)
+    print(url)
+    response = json.loads(str((requests.get(url).content).decode('UTF-8')))
+    return response
 
-def lookup(symbol):
-    """Look up quote for symbol."""
+def total_results(searchterm):
+    '''
+    Collect results for the first 30 (or less) searchresults pages.
+    '''
+    total_pages = results_per_page(searchterm, pagenr=1)["total_pages"]
+    searchresults = []
+    pagenr = 1
 
-    # reject symbol if it starts with caret
-    if symbol.startswith("^"):
-        return None
+    # Blijf resultaten toevoegen tot paginalimiet (of pagina 30) is bereikt.
+    while pagenr < 30 and pagenr <= total_pages:
+        searchresults += results_per_page(searchterm, pagenr)["results"]
+        pagenr += 1
+    return([i for i in searchresults if i["original_language"] == "nl"])
 
-    # reject symbol if it contains comma
-    if "," in symbol:
-        return None
+def film_informatie(tmdb_id):
+    '''
+    Request film information for a specific TMDb film ID.
+    '''
+    from urllib.request import urlopen
+    tmdb_url = str(tmdb_search + tmdb_id + tmdb_key + tmdb_nl)
+    return(json.loads(str((requests.get(tmdb_url).content).decode('UTF-8'))))
 
-    # query Yahoo for quote
-    # http://stackoverflow.com/a/21351911
-    try:
+def popular_films():
+    return(json.loads(str((requests.get("https://goo.gl/1wCPmP").content).decode('UTF-8'))))
 
-        # GET CSV
-        url = f"http://download.finance.yahoo.com/d/quotes.csv?f=snl1&s={symbol}"
-        webpage = urllib.request.urlopen(url)
-
-        # read CSV
-        datareader = csv.reader(webpage.read().decode("utf-8").splitlines())
-
-        # parse first row
-        row = next(datareader)
-
-        # ensure stock exists
-        try:
-            price = float(row[2])
-        except:
-            return None
-
-        # return stock's name (as a str), price (as a float), and (uppercased) symbol (as a str)
-        return {
-            "name": row[1],
-            "price": price,
-            "symbol": row[0].upper()
-        }
-
-    except:
-        pass
-
-    # query Alpha Vantage for quote instead
-    # https://www.alphavantage.co/documentation/
-    try:
-
-        # GET CSV
-        url = f"https://www.alphavantage.co/query?apikey=NAJXWIA8D6VN6A3K&datatype=csv&function=TIME_SERIES_INTRADAY&interval=1min&symbol={symbol}"
-        webpage = urllib.request.urlopen(url)
-
-        # parse CSV
-        datareader = csv.reader(webpage.read().decode("utf-8").splitlines())
-
-        # ignore first row
-        next(datareader)
-
-        # parse second row
-        row = next(datareader)
-
-        # ensure stock exists
-        try:
-            price = float(row[4])
-        except:
-            return None
-
-        # return stock's name (as a str), price (as a float), and (uppercased) symbol (as a str)
-        return {
-            "name": symbol.upper(), # for backward compatibility with Yahoo
-            "price": price,
-            "symbol": symbol.upper()
-        }
-
-    except:
-        return None
-
-
-def usd(value):
-    """Formats value as USD."""
-    return f"${value:,.2f}"
+def new_films():
+    return(json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&with_original_language=nl&year=" + year).content).decode('UTF-8'))))

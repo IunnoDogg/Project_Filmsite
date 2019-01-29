@@ -18,9 +18,6 @@ if app.config["DEBUG"]:
         response.headers["Pragma"] = "no-cache"
         return response
 
-# custom filter
-app.jinja_env.filters["usd"] = usd
-
 # configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
@@ -171,25 +168,24 @@ def layout():
 def index():
     from urllib.request import urlopen
     popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
-    popular_results = popular["results"]
+    new = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&year=" + str(datetime.date.today().year) + "&with_original_language=nl").content).decode('UTF-8')))
 
     gebruikersnaam = gebruiker()
     verzoeken = verzoek()
     lengte = lengte_vv()
     tipslengte=tipslength()
     totaal = tipslengte + lengte
-    print(totaal)
 
-    return render_template("index.html", results=popular_results, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
+    return render_template("index.html", popular=popular["results"], new=new["results"], lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
 @app.route("/")
 def homepage():
     # Haal populaire films op
     from urllib.request import urlopen
     popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
-    popular_results = popular["results"]
+    new = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&year=" + str(datetime.date.today().year) + "&with_original_language=nl").content).decode('UTF-8')))
 
-    return render_template("homepage.html", results=popular_results)
+    return render_template("homepage.html", popular=popular["results"], new=new["results"])
 
 @app.route("/wachtwoord")
 def wachtwoord():
@@ -381,9 +377,6 @@ def vriendenlijst():
     vrienden1 = db.execute("SELECT * FROM verzoeken WHERE van=:van AND geaccepteerd=:geaccepteerd",
                            van=gebruikersnaam, geaccepteerd="ja")
 
-    print(vrienden)
-    print(vrienden1)
-
     if vrienden:
         a = len(vrienden)
 
@@ -441,30 +434,6 @@ def verzoeken():
 
     return render_template("verzoeken.html", verzoeken=verzoeken, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
 
-# ZOEKEN
-'''
-    from urllib.request import urlopen
-    popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
-    popular_results = popular["results"]
-'''
-def zoeken(zoekterm, pagenr):
-
-    # ophalen (per pagina)
-    from urllib.request import urlopen
-    url = "https://api.themoviedb.org/3/search/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&query=" + zoekterm + "&include_adult=false&page=" + str(pagenr)
-    response = json.loads(str((requests.get(url).content).decode('UTF-8')))
-
-    '''
-    # geen resultaten
-    if response["total_results"] == 0:
-        return False
-    # als paginanummer niet voorkomt
-    elif int(pagenr) > response["total_pages"]:
-        return False
-    else:
-    '''
-    return response
-
 @app.route("/zoeken", methods=["GET", "POST"])
 @login_required
 def zoekresultaat():
@@ -476,44 +445,28 @@ def zoekresultaat():
     totaal = tipslengte + lengte
 
     if request.method == "POST":
-        zoekterm = request.form.get("zoekterm")
+        searchterm = request.form.get("zoekterm")
 
-        if not zoekterm: return apology("Geen zoekterm")
-
-        # resultaten pagina 1 - 30
-        elif zoeken(zoekterm, 1) != False:
-            zoekresultaten = zoeken(zoekterm, 1)["results"]
-            x = 2
-            while x < 30:
-                zoekresultaten += zoeken(zoekterm, x)["results"]
-                x += 1
-
-            return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten, lengte=lengte, tipslengte=tipslengte, totaal=totaal)
-
+        if not searchterm:
+            return apology("Geen zoekterm")
+        elif results_per_page(searchterm, pagenr=1) == False:
+            return apology("Geen resultaten")
         else:
-            return apology("Iets ging mis")
+            return render_template("zoekresultaten.html", zoekresultaten=total_results(searchterm), lengte=lengte, tipslengte=tipslengte, totaal=totaal)
+
 
 @app.route("/zoekennon", methods=["GET", "POST"])
 def zoekresultaat_non():
 
     if request.method == "POST":
-        zoekterm = request.form.get("zoekterm")
+        searchterm = request.form.get("zoekterm")
 
-        if not zoekterm: return apologynon("Geen zoekterm")
-
-        # resultaten pagina 1 - 30
-        elif zoeken(zoekterm, 1) != False:
-            zoekresultaten = zoeken(zoekterm, 1)["results"]
-            x = 2
-            while x < 30:
-                zoekresultaten += zoeken(zoekterm, x)["results"]
-                x += 1
-
-
-            return render_template("zoekresultaten.html", zoekresultaten=zoekresultaten)
-
+        if not searchterm:
+            return apology("Geen zoekterm")
+        elif results_per_page(searchterm, pagenr=1) == False:
+            return apology("Geen resultaten")
         else:
-            return apology("Iets ging mis")
+            return render_template("zoekresultaten.html", zoekresultaten=total_results(searchterm))
 
 @app.route("/filminfo", methods=["GET", "POST"])
 @login_required
@@ -581,12 +534,42 @@ def mijnprofiel():
     "Pas je profiel aan"
 
     gebruikersnaam = gebruiker()
-    verzoeken = verzoek()
     lengte = lengte_vv()
     tipslengte=tipslength()
     totaal = tipslengte + lengte
 
-    return render_template("mijnprofiel.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
+    vrienden = db.execute("SELECT * FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd",
+                           naar=gebruikersnaam, geaccepteerd="ja")
+
+    vrienden1 = db.execute("SELECT * FROM verzoeken WHERE van=:van AND geaccepteerd=:geaccepteerd",
+                           van=gebruikersnaam, geaccepteerd="ja")
+
+    if vrienden:
+        a = len(vrienden)
+
+    else:
+        a = 0
+
+    if vrienden1:
+        b = len(vrienden1)
+
+    else:
+        b = 0
+
+    favorieten = db.execute("SELECT * FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
+
+    historie = db.execute("SELECT * FROM historie WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
+
+    lijsten = db.execute("SELECT lijstnaam FROM lijsten WHERE gebruiker=:gebruiker AND gez_lijst IS NULL", gebruiker=gebruikersnaam)
+    lijsten2 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker=:gebruiker", gebruiker=gebruikersnaam)
+    lijsten3 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker2=:gebruiker2", gebruiker2=gebruikersnaam)
+
+    aanbevelingen = db.execute("SELECT * FROM aanbevelingen WHERE naar=:naar", naar=gebruikersnaam)
+    print(aanbevelingen)
+
+    return render_template("mijnprofiel.html", lengte=lengte, tipslengte=tipslengte,
+    totaal=totaal, vrienden=vrienden, vrienden1=vrienden1, a=a, b=b, favorieten=favorieten, historie=historie,
+    lijsten=lijsten, lijsten2=lijsten2, lijsten3=lijsten3, aanbevelingen=aanbevelingen)
 
 @app.route("/wachtwoordvergeten", methods=["GET", "POST"])
 def wachtwoordvergeten():
@@ -902,7 +885,29 @@ def mijnlijsten():
     tipslengte=tipslength()
     totaal = tipslengte + lengte
 
-    return render_template("mijnlijsten.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
+    vrienden = db.execute("SELECT * FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd",
+                           naar=gebruikersnaam, geaccepteerd="ja")
+
+    vrienden1 = db.execute("SELECT * FROM verzoeken WHERE van=:van AND geaccepteerd=:geaccepteerd",
+                           van=gebruikersnaam, geaccepteerd="ja")
+
+    if vrienden:
+        a = len(vrienden)
+
+    else:
+        a = 0
+
+    if vrienden1:
+        b = len(vrienden1)
+
+    else:
+        b = 0
+
+    lijsten = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gez_lijst IS NULL", gebruiker=gebruikersnaam)
+    lijsten2 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker=:gebruiker", gebruiker=gebruikersnaam)
+    lijsten3 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker2=:gebruiker2", gebruiker2=gebruikersnaam)
+
+    return render_template("mijnlijsten.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal, vrienden=vrienden, vrienden1=vrienden1, a=a, b=b, lijsten=lijsten, lijsten2=lijsten2, lijsten3=lijsten3)
 
 @app.route("/checkins", methods=["GET", "POST"])
 @login_required
@@ -924,10 +929,6 @@ def tipvriend():
     lengte = lengte_vv()
     tipslengte=tipslength()
     totaal = tipslengte + lengte
-
-    from urllib.request import urlopen
-    popular = json.loads(str((requests.get("https://api.themoviedb.org/3/discover/movie?api_key=9c226374f10b2dcd656cf7c348ee760a&language=nl&sort_by=popularity.desc&page=1&with_original_language=nl").content).decode('UTF-8')))
-    popular_results = popular["results"]
 
     if request.method == "POST":
 
@@ -966,7 +967,7 @@ def tipvriend():
 
             aanbevelingen = db.execute("SELECT * FROM aanbevelingen WHERE van=:van", van=gebruikersnaam)
 
-            return render_template("index.html", results=popular_results, tmdb=tmdb_response, omdb=omdb_response, favorieten=favorieten, lengte=lengte, tipslengte=tipslengte, totaal=totaal, aanbevelingen=aanbevelingen)
+            return render_template("index.html", popular=(popular_films())["results"], new=(new_films())["results"], tmdb=tmdb_response, omdb=omdb_response, favorieten=favorieten, lengte=lengte, tipslengte=tipslengte, totaal=totaal, aanbevelingen=aanbevelingen)
 
         else:
             return apology("Deze gebruiker is geen vriend van je")
@@ -982,16 +983,6 @@ def tips():
     aanbevelingen = db.execute("SELECT * FROM aanbevelingen WHERE naar=:naar", naar=gebruikersnaam)
     return render_template("tips.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal, aanbevelingen=aanbevelingen)
 
-@app.route("/profielvriend", methods=["GET", "POST"])
-@login_required
-def profielvriend():
-    gebruikersnaam = gebruiker()
-    verzoeken = verzoek()
-    lengte = lengte_vv()
-    tipslengte=tipslength()
-    totaal = tipslengte + lengte
-    return render_template("profielvriend.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
-
 @app.route("/vriendinfo", methods=["POST"])
 @login_required
 def vriendinfo():
@@ -1002,12 +993,24 @@ def vriendinfo():
         tipslengte=tipslength()
         totaal = tipslengte + lengte
 
-        vriend = request.form.get("profiel")
-        vriend1 = request.form.get("profiel1")
+        profiel = request.form.get("profiel")
 
-        favorieten = db.execute("SELECT * FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=vriend)
-        favorieten1 = db.execute("SELECT * FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=vriend1)
-    return render_template("vriendinfo.html", favorieten=favorieten, lengte=lengte, tipslengte=tipslengte, totaal=totaal, favorieten1=favorieten1)
+        if profiel == None:
+            profiel = request.form.get("profiel1")
+
+        vriend = request.form.get("vriend")
+
+        if vriend == None:
+            vriend = request.form.get("vriend1")
+            if vriend == None:
+                vriend = request.form.get("vriend2")
+
+        favorieten = db.execute("SELECT * FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=profiel)
+
+        if not favorieten:
+            favorieten = db.execute("SELECT * FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=vriend)
+
+    return render_template("vriendinfo.html", favorieten=favorieten, lengte=lengte, tipslengte=tipslengte, totaal=totaal, profiel=profiel, vriend=vriend)
 
 @app.route("/verwijdervriendredirect", methods=["POST"])
 @login_required
@@ -1069,3 +1072,109 @@ def verwijdervriend():
                             van=gebruikersnaam, naar=vriendd, geaccepteerd="ja")
 
         return render_template("verwijderdvriend.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal)
+
+@app.route("/lijstgemaakt", methods=["POST"])
+@login_required
+def lijstgemaakt():
+    if request.method == "POST":
+        gebruikersnaam = gebruiker()
+        verzoeken = verzoek()
+        lengte = lengte_vv()
+        tipslengte=tipslength()
+        totaal = tipslengte + lengte
+
+        lijstnaam = request.form.get("lijstnaam")
+
+        check = db.execute("SELECT * FROM lijsten WHERE lijstnaam=:lijstnaam AND gebruiker=:gebruiker AND gebruiker2 IS NULL",
+                            lijstnaam=lijstnaam, gebruiker=gebruikersnaam)
+        if check:
+            tekst = "Je hebt al een lijst die " + lijstnaam + " heet"
+            return apology(tekst)
+
+        else:
+            db.execute("INSERT INTO lijsten (gebruiker, lijstnaam) VALUES (:gebruiker, :lijstnaam)",
+                    gebruiker=gebruikersnaam, lijstnaam=lijstnaam)
+
+        return render_template("lijstgemaakt.html", lengte=lengte, tipslengte=tipslengte, lijstnaam=lijstnaam)
+
+@app.route("/gezamenlijkelijstgemaakt", methods=["POST"])
+@login_required
+def gezamenlijkelijstgemaakt():
+    if request.method == "POST":
+        gebruikersnaam = gebruiker()
+        verzoeken = verzoek()
+        lengte = lengte_vv()
+        tipslengte=tipslength()
+        totaal = tipslengte + lengte
+
+        lijstnaam = request.form.get("gez_lijstnaam")
+        vriend = request.form.get("vriendvan")
+        vriend2 = request.form.get("vriendnaar")
+
+        if vriend:
+            check1 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam",
+                                      gebruiker=gebruikersnaam, gebruiker2=vriend, lijstnaam=lijstnaam)
+
+            check2 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam",
+                                      gebruiker2=gebruikersnaam, gebruiker=vriend, lijstnaam=lijstnaam)
+
+            if check1 or check2:
+                tekst = "Je hebt al een lijst die " + lijstnaam + " heet met deze vriend"
+                return apology(tekst)
+
+            else:
+                db.execute("INSERT INTO lijsten (gebruiker, lijstnaam, gebruiker2, gez_lijst) VALUES (:gebruiker, :lijstnaam, :gebruiker2, :gez_lijst)",
+                            gebruiker=gebruikersnaam, lijstnaam=lijstnaam, gebruiker2=vriend, gez_lijst="ja")
+
+
+        if vriend2:
+            check1 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam",
+                                      gebruiker=gebruikersnaam, gebruiker2=vriend2, lijstnaam=lijstnaam)
+
+            check2 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam",
+                                      gebruiker2=gebruikersnaam, gebruiker=vriend2, lijstnaam=lijstnaam)
+
+            if check1 or check2:
+                tekst = "Je hebt al een lijst die " + lijstnaam + " heet met deze vriend"
+                return apology(tekst)
+
+            else:
+                db.execute("INSERT INTO lijsten (gebruiker, lijstnaam, gebruiker2, gez_lijst) VALUES (:gebruiker, :lijstnaam, :gebruiker2, :gez_lijst)",
+                            gebruiker=gebruikersnaam, lijstnaam=lijstnaam, gebruiker2=vriend2, gez_lijst="ja")
+
+        return render_template("gezamenlijkelijstgemaakt.html", lengte=lengte, tipslengte=tipslengte, lijstnaam=lijstnaam)
+
+@app.route("/lijst", methods=["POST"])
+@login_required
+def lijst():
+    if request.method == "POST":
+        gebruikersnaam = gebruiker()
+        verzoeken = verzoek()
+        lengte = lengte_vv()
+        tipslengte=tipslength()
+        totaal = tipslengte + lengte
+
+        lijstnaam = request.form.get("button")
+
+        return render_template("lijst.html", lengte=lengte, tipslengte=tipslengte, lijstnaam=lijstnaam)
+
+@app.route("/gezlijst", methods=["POST"])
+@login_required
+def gezlijst():
+    if request.method == "POST":
+        gebruikersnaam = gebruiker()
+        verzoeken = verzoek()
+        lengte = lengte_vv()
+        tipslengte=tipslength()
+        totaal = tipslengte + lengte
+
+        lijstnaam = request.form.get("button")
+        vriend = request.form.get("vriend")
+
+        lijsten1 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam",
+                            gebruiker=gebruikersnaam, gebruiker2=vriend, lijstnaam=lijstnaam)
+
+        lijsten2 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam",
+                            gebruiker2=gebruikersnaam, gebruiker=vriend, lijstnaam=lijstnaam)
+
+        return render_template("gezlijst.html", lengte=lengte, tipslengte=tipslengte, lijsten1=lijsten1, lijsten2=lijsten2)

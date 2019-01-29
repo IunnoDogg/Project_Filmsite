@@ -5,15 +5,172 @@
 {% endblock %}
 
 {% block main %}
+<style>
+* {
+  box-sizing: border-box;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 50%;
+  padding: 10px;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.anders {
+  border: none;
+  background-color: inherit;
+  padding: 14px 28px;
+  font-size: 16px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+/* On mouse-over */
+.btn:hover {background: inherit;}
+
+.primary {color: #0000FF;}
+
+</style>
+
 <center><h2>Mijn profiel</h2></center>
 <hr>
-  <ul style="list-style-type:square;">
-    <li><a href="/wachtwoordgebruikers">Wachtwoord wijzigen</a></li>
-    <li><a href="/vriendenlijst">Mijn vrienden</a></li>
-    <li><a href="/favorieten">Mijn favorieten</a></li>
-    <li>Mijn bekeken films</li>
-    <li>Mijn kijklijst</li>
-    <li>Mijn lijsten</li>
-  </ul>
-</p>
+
+<div class="row">
+  <div class="column" style="background-color:#ccc;">
+    <center>
+      <h2><a href="/wachtwoordgebruikers"><font color="black">Wachtwoord wijzigen</font></a></h2>
+      <p></p>
+    </center>
+  </div>
+  <div class="column" style="background-color:#eee;">
+    <center>
+      <h2><a href="/accountverwijderen"><font color="black">Account verwijderen</font></a></h2>
+      <p>Weet je het zeker..?</p>
+    </center>
+  </div>
+</div>
+
+<div class="row">
+  <div class="column" style="background-color:#eee;">
+    <center>
+      <h2><a href="/vriendenlijst"><font color="black">Mijn vrienden</font></a></h2>
+      <p><h5>
+        <form action="/vriendinfo" method="post">
+        {% for vriend in vrienden %}
+        {% if a > 0 %}
+        <button type="submit" name="profiel" value="{{vriend.van}}" class="anders primary">{{vriend.van}}</button>
+        {% endif %}
+        {% endfor %}
+        {% for vriend in vrienden1 %}
+        {% if b > 0 %}
+        <button type="submit" name="profiel1" value="{{vriend.naar}}" class="anders primary">{{vriend.naar}}</button>
+        {% endif %}
+        {% endfor %}
+      </h5></p>
+    </center>
+  </div>
+  <div class="column" style="background-color:#ccc;">
+    <center>
+      <h2><a href="/favorieten"><font color="black">Mijn favorieten</font></a></h2>
+      <p>
+        {% for favoriet in favorieten %}
+        <a href="/favorieten"><font color="#0000FF">{{favoriet.titel}}</font></a>;
+        {% endfor %}
+      </p>
+    </center>
+  </div>
+</div>
+
+<div class="row">
+  <div class="column" style="background-color:#ccc;">
+    <center>
+      <h2><a href="/historie"><font color="black">Kijkgeschiedenis</font></a></h2>
+      <p>
+        {% for film in historie %}
+          <a href="/favorieten"><font color="#0000FF">{{film.titel}}</font></a>;
+        {% endfor %}
+      </p>
+    </center>
+  </div>
+  <div class="column" style="background-color:#eee;">
+    <center>
+      <h2><a href="#"><font color="black">Mijn kijklijst</font></a></h2>
+      <p>
+        <h5>
+          x
+        </h5>
+      </p>
+    </center>
+  </div>
+</div>
+
+<div class="row">
+  <div class="column" style="background-color:#eee;">
+    <center>
+      <h2><a href="/mijnlijsten"><font color="black">Mijn lijsten</font></a></h2>
+      <p>
+        {% for lijst in lijsten %}
+        <a href="/mijnlijsten"><font color="#0000FF">{{lijst.lijstnaam}}</font></a>;
+        {% endfor %}
+        {% for lijst in lijsten2 %}
+        <a href="/mijnlijsten"><font color="#0000FF">{{lijst.lijstnaam}}</font></a>;
+        {% endfor %}
+        {% for lijst in lijsten3 %}
+        <a href="/mijnlijsten"><font color="#0000FF">{{lijst.lijstnaam}}</font></a>;
+        {% endfor %}
+      </p>
+    </center>
+  </div>
+  <div class="column" style="background-color:#ccc;">
+    <center>
+      <h2><a href="#"><font color="black">Mijn check-ins</font></a></h2>
+      <p>Some text..</p>
+    </center>
+  </div>
+</div>
+
+<div class="row">
+  <div class="column" style="background-color:#ccc;">
+    <center>
+      <h2><a href="/tips"><font color="black">Tips van vrienden</font></a></h2>
+      <p>
+        <h5>
+          <form action="/filminfo" method="post">
+            {% for tip in aanbevelingen %}
+            <button class="anders primary" name="tmdb_id" value="{{tip.film_id}}" type="submit">{{tip.titel}} getipt door: {{tip.van}}</button>
+            {% endfor %}
+          </form>
+        </h5>
+      </p>
+    </center>
+  </div>
+  <div class="column" style="background-color:#eee;">
+    <center>
+      <h2><a href="#"><font color="black">Tips naar vrienden</font></a></h2>
+      <p>Some text..</p>
+    </center>
+  </div>
+</div>
+
+<script>
+// Get the elements with class="column"
+var elements = document.getElementsByClassName("column");
+
+// Declare a loop variable
+var i;
+
+// Grid View
+function gridView() {
+  for (i = 0; i < elements.length; i++) {
+    elements[i].style.width = "50%";
+  }
+}
+</script>
 {% endblock %}

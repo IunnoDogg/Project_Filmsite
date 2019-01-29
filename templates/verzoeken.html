@@ -16,9 +16,6 @@
           <p><h5>Vriendschapsverzoek van {{verzoek.van}} !</h5></p>
           <button class="btn btn-outline-success btn-sm" name="accepteren" value="{{verzoek.van}}" type="submit">Vriend toevoegen</button>
           <button class="btn btn-outline-danger btn-sm" name="weigeren" value="_{{verzoek.van}}" type="submit">Weigeren</button>
-          <div class="alert alert-danger weigeren_alert" name="alert1" role="alert" id="alert___{{verzoek.van}}" style="display:none;">
-            Verzoek van {{verzoek.van}} is geweigerd!
-          </div>
         </li>
       </ul>
       {% endfor %}

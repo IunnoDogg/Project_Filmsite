@@ -13,10 +13,14 @@
   #linkerkolom {
      float:left;
      width:25%;
+     padding: 20px;
   }
   #rechterkolom {
      float:right;
      width:75%;
+  }
+  #linker {
+
   }
   /* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
   @media screen and (max-width: 800px) {
@@ -41,7 +45,7 @@
             <div class="col-sm-12 controls">
               {% if alfavo != True %}
               <p align="center">
-                <button class="btn btn-outline-success" id="{{tmdb.id}}" type="submit" name="favorieten" value="{{tmdb.id}}">Favoriet</button>
+                <button class="btn btn-outline-success" id="{{tmdb.id}}" type="submit" name="favorieten" value="{{tmdb.id}}"><i class="fa fa-plus" aria-hidden="true"></i> Favoriet</button>
               </p>
               {% endif %}
             </div>
@@ -85,8 +89,8 @@
             <!--    {% endfor %}-->
             <!--  </div>-->
             <!--</div>-->
-          </p>
-        </form>
+    <!--      </p>-->
+    <!--    </form>-->
       </p>
     </div>
       <div id="rechterkolom">
