@@ -24,7 +24,8 @@ Nederlandse (NL) Films heeft als streven liefhebbers van Nederlandse film gemakk
       * Wachtwoord vergeten
         * Opnieuw instellen a.d.h.v. veiligheidsvraag
   * 1.2 🏠 Homepagina:
-    * Lijst met de 12 populairste films
+    * Lijst met de 12 populairste Nederlandse films op The Movie Database
+    * Lijst met nieuwe films: 12 Nederlandse films uit 2019, gesorteerd van populair naar minder populair.
   * 1.3 🍿 Filminformatie:
       * Omschrijving
       * Geef de rating van de film weer
@@ -36,15 +37,17 @@ Nederlandse (NL) Films heeft als streven liefhebbers van Nederlandse film gemakk
   * 2.1 Vanaf iedere pagina:
     * 🔍 Zoeken naar films
       * Zoekresultaten pagina
-    * ❤️ Filmlijsten bekijken:
-      * Favoriete films
-      * Bekeken films
-      * Kijklijst
-      * Check-ins
+    * ❤️ Filmlijsten:
+      * Lijst of gezamenlijke lijst aanmaken
+      * Toevoegen aan/bekijken van favoriete films
+      * Historie bekijken: films die op NL Films zijn aangeklikt
+      * Aan (gezamenlijke) lijst toevoegen
+      * Check-in: een film aanvinken als 'gezien' (of verwijderen uit checkins)
     * 👥 Interactie met vrienden:
       * Vriendschapsverzoeken sturen a.d.h.v. gebruikersnaam
       * Vriendschapsverzoeken accepteren of weigeren
       * Film tippen aan een vriend
+      * Favorieten van vriend bekijken
       * Vriendenlijst bekijken
     * 👤 Account:
       * Profiel bekijken
@@ -52,7 +55,8 @@ Nederlandse (NL) Films heeft als streven liefhebbers van Nederlandse film gemakk
       * Account verwijderen
       * Uitloggen
   * 2.2 🏠 Homepage:
-    * Lijst met de 12 populairste films  
+    * Lijst met de 12 populairste Nederlandse films op The Movie Database
+    * Lijst met nieuwe films: 12 Nederlandse films uit 2019, gesorteerd van populair naar minder populair.
   * 2.3 🍿 Filminformatie:
     * Voeg film toe aan Favorieten
     * Verwijder film van Favorieten
@@ -63,12 +67,18 @@ Nederlandse (NL) Films heeft als streven liefhebbers van Nederlandse film gemakk
     * Jaar van de release
     * Bekijk de regisseur(s), schrijver(s) en hoofdrolspelers
 
-* Eventueel in de toekomst:
-  * Dealternatievelen via Social Media.
+* Zaken die zijn overwegen maar (nog) niet op onze agenda stonden:
   * Lijst met top gebruikers bekijken
   * Vrienden berichten sturen
-  * Films toevoegen aan een gezamenlijke lijst (update 2 lijsten)
   * Per categorie: de beste films.
+  * Een feed met films die vrienden hebben gefavoriet in chronologische volgorde.
+  * Inloggen met Facebook
+  
+* Gebreken:
+  * Tips van vrienden verwijderen
+  * Op de "Tips van vrienden" pagina moet het niet mogelijk zijn vrienden de film die zij jou getipt hebben terug te tippen. Dat kan nu wel.
+  * Op de mijn profiel pagina kan je zien welke films je aan mensen hebt getipt (en hoe vaak). Echter, je kan niet zien aan wíe.
+  * De veiligheidsvraag is “Wat is jouw lievelingskleur”. Er wordt echter niet gevalideerd of het antwoord daadwerkelijk een kleur is. Deze vraag zou eventueel anders kunnen worden geformuleerd.
 
 ---
 
