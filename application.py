@@ -131,9 +131,9 @@ def registerform():
     if not request.form.get("gebruikersnaam"):
         return apologynon("Geef een gebruikersnaam op.")
 
-    # ensure password was submitted
-    elif not request.form.get("email"):
-        return apologynon("Geef een e-mailadres op.")
+    # # ensure password was submitted
+    # elif not request.form.get("email"):
+    #     return apologynon("Geef een e-mailadres op.")
 
     # ensure password was submitted
     elif not request.form.get("wachtwoord"):
@@ -216,10 +216,10 @@ def register():
         wachtwoord = pwd_context.hash(request.form.get("wachtwoord"))
 
         # insert the user into the database
-        result = db.execute("INSERT INTO gebruikers (gebruikersnaam, wachtwoord, email, veiligheidsvraag) VALUES \
-                            (:gebruikersnaam, :wachtwoord, :email, :veiligheidsvraag)",
+        result = db.execute("INSERT INTO gebruikers (gebruikersnaam, wachtwoord, veiligheidsvraag) VALUES \
+                            (:gebruikersnaam, :wachtwoord, :veiligheidsvraag)",
                             gebruikersnaam=request.form.get("gebruikersnaam"), wachtwoord=wachtwoord,
-                            email=request.form.get("email"), veiligheidsvraag=request.form.get("veiligheidsvraag"))
+                            veiligheidsvraag=request.form.get("veiligheidsvraag"))
 
         if not result:
             return apologynon("username already exists")
@@ -255,30 +255,26 @@ def login():
         if not request.form.get("wachtwoord-inloggen"):
             return apologynon("Geef een wachtwoord op")
 
-        # # query database for username
-        # x = "gebruikersnaam=" + ophalen("gebruiker-inloggen")
-        # a = select("*", "gebruikers", "gebruikersnaam=:gebruikersnaam", x)
-        # print(a)
         rows = db.execute("SELECT * FROM gebruikers WHERE gebruikersnaam = :gebruikersnaam",
                           gebruikersnaam=request.form.get("gebruiker-inloggen"))
 
-        rows1 = db.execute("SELECT * FROM gebruikers WHERE email = :email",
-                          email=request.form.get("gebruiker-inloggen"))
+        # rows1 = db.execute("SELECT * FROM gebruikers WHERE email = :email",
+        #                   email=request.form.get("gebruiker-inloggen"))
 
-        if len(rows) == 0:
-            if len(rows1) != 1 or not pwd_context.verify(request.form.get("wachtwoord-inloggen"), rows1[0]["wachtwoord"]):
-                return apologynon("Ongeldige email en/of wachtwoord")
+        # if len(rows) == 0:
+        #     if len(rows1) != 1 or not pwd_context.verify(request.form.get("wachtwoord-inloggen"), rows1[0]["wachtwoord"]):
+        #         return apologynon("Ongeldige email en/of wachtwoord")
 
         # ensure username exists and password is correct
-        elif len(rows) != 1 or not pwd_context.verify(request.form.get("wachtwoord-inloggen"), rows[0]["wachtwoord"]):
+        if len(rows) != 1 or not pwd_context.verify(request.form.get("wachtwoord-inloggen"), rows[0]["wachtwoord"]):
             return apologynon("Ongeldige gebruikersnaam en/of wachtwoord")
 
         # remember which user has logged in
         if len(rows) > 0:
             session["user_id"] = rows[0]["id"]
 
-        elif len(rows1) > 0:
-            session["user_id"] = rows1[0]["id"]
+        # elif len(rows1) > 0:
+        #     session["user_id"] = rows1[0]["id"]
 
         # redirect user to home page
         return redirect(url_for("index"))
@@ -412,8 +408,6 @@ def verzoeken():
             weigeren = weigerenn[1:]
             now = datetime.datetime.now()
             date = now.strftime("%d-%m-%Y")
-            # db.execute("UPDATE verzoeken SET geaccepteerd=:geaccepteerd AND afgewezen=:afgewezen WHERE van=:van AND naar=:naar",
-            #             geaccepteerd="nee", afgewezen="ja", van=weigeren, naar=gebruikersnaam)
 
             db.execute("DELETE FROM verzoeken WHERE van=:van AND naar=:naar", naar=gebruikersnaam, van=weigeren)
             db.execute("INSERT INTO verzoeken (van, naar, geaccepteerd, uitgenodigd, afgewezen, datum) VALUES (:van, :naar, :geaccepteerd, :uitgenodigd, :afgewezen, :datum)",
@@ -586,19 +580,20 @@ def mijnprofiel():
         b = 0
 
     favorieten = db.execute("SELECT * FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
-
+    checkins = db.execute("SELECT * FROM checkins WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
     historie = db.execute("SELECT * FROM historie WHERE gebruiker=:gebruiker", gebruiker=gebruikersnaam)
+    aanbevelingen = db.execute("SELECT * FROM aanbevelingen WHERE naar=:naar", naar=gebruikersnaam)
+    aanbevelingenvan = db.execute("SELECT * FROM aanbevelingen WHERE van=:van", van=gebruikersnaam)
 
-    lijsten = db.execute("SELECT lijstnaam FROM lijsten WHERE gebruiker=:gebruiker AND gez_lijst IS NULL", gebruiker=gebruikersnaam)
+    lijsten = db.execute("SELECT lijstnaam FROM lijsten WHERE gebruiker=:gebruiker AND gez_lijst IS NULL AND nieuwe_lijst=:nieuwe_lijst",
+                        gebruiker=gebruikersnaam, nieuwe_lijst="ja")
     lijsten2 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker=:gebruiker", gebruiker=gebruikersnaam)
     lijsten3 = db.execute("SELECT * FROM lijsten WHERE gez_lijst IS NOT NULL AND gebruiker2=:gebruiker2", gebruiker2=gebruikersnaam)
 
-    aanbevelingen = db.execute("SELECT * FROM aanbevelingen WHERE naar=:naar", naar=gebruikersnaam)
-    print(aanbevelingen)
-
     return render_template("mijnprofiel.html", lengte=lengte, tipslengte=tipslengte,
     totaal=totaal, vrienden=vrienden, vrienden1=vrienden1, a=a, b=b, favorieten=favorieten, historie=historie,
-    lijsten=lijsten, lijsten2=lijsten2, lijsten3=lijsten3, aanbevelingen=aanbevelingen)
+    lijsten=lijsten, lijsten2=lijsten2, lijsten3=lijsten3, aanbevelingen=aanbevelingen, checkins=checkins,
+    aanbevelingenvan=aanbevelingenvan, gebruikersnaam=gebruikersnaam)
 
 @app.route("/wachtwoordvergeten", methods=["GET", "POST"])
 def wachtwoordvergeten():
@@ -749,7 +744,6 @@ def accountverwijderen():
         gebruikersnaam = gebruiker()
 
         wachtwoord = request.form.get("wachtwoord")
-        print(wachtwoord)
         wachtwoord_herhaling = request.form.get("wachtwoord_herhaling")
 
         if not wachtwoord:
@@ -991,7 +985,8 @@ def tipvriend():
 
             aanbevelingen = db.execute("SELECT * FROM aanbevelingen WHERE van=:van", van=gebruikersnaam)
 
-            return render_template("index.html", popular=(popular_films())["results"], new=(new_films())["results"], tmdb=tmdb_response, omdb=omdb_response, favorieten=favorieten, lengte=lengte, tipslengte=tipslengte, totaal=totaal, aanbevelingen=aanbevelingen)
+            return render_template("index.html", popular=(popular_films())["results"], new=(new_films())["results"], tmdb=tmdb_response,
+            omdb=omdb_response, favorieten=favorieten, lengte=lengte, tipslengte=tipslengte, totaal=totaal, aanbevelingen=aanbevelingen)
 
         else:
             return apology("Deze gebruiker is geen vriend van je")
@@ -1005,14 +1000,31 @@ def tips():
     tipslengte=tipslength()
     totaal = tipslengte + lengte
     aanbevelingen = db.execute("SELECT * FROM aanbevelingen WHERE naar=:naar", naar=gebruikersnaam)
-    return render_template("tips.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal, aanbevelingen=aanbevelingen)
+    vrienden = db.execute("SELECT * FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd",
+                           naar=gebruikersnaam, geaccepteerd="ja")
+
+    vrienden1 = db.execute("SELECT * FROM verzoeken WHERE van=:van AND geaccepteerd=:geaccepteerd",
+                           van=gebruikersnaam, geaccepteerd="ja")
+
+    if vrienden:
+        a = len(vrienden)
+
+    else:
+        a = 0
+
+    if vrienden1:
+        b = len(vrienden1)
+
+    else:
+        b = 0
+    return render_template("tips.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal, aanbevelingen=aanbevelingen,
+                            vrienden=vrienden, vrienden1=vrienden1, a=a, b=b)
 
 @app.route("/vriendinfo", methods=["POST"])
 @login_required
 def vriendinfo():
     if request.method == "POST":
         gebruikersnaam = gebruiker()
-        verzoeken = verzoek()
         lengte = lengte_vv()
         tipslengte=tipslength()
         totaal = tipslengte + lengte
@@ -1022,19 +1034,21 @@ def vriendinfo():
         if profiel == None:
             profiel = request.form.get("profiel1")
 
-        vriend = request.form.get("vriend")
-
-        if vriend == None:
-            vriend = request.form.get("vriend1")
-            if vriend == None:
-                vriend = request.form.get("vriend2")
-
         favorieten = db.execute("SELECT * FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=profiel)
+        checkins = db.execute("SELECT * FROM checkins WHERE gebruiker=:gebruiker", gebruiker=profiel)
+        historie = db.execute("SELECT * FROM historie WHERE gebruiker=:gebruiker", gebruiker=profiel)
+        vrienden = db.execute("SELECT * FROM verzoeken WHERE naar=:naar AND geaccepteerd=:geaccepteerd",
+                                naar=profiel, geaccepteerd="ja")
 
-        if not favorieten:
-            favorieten = db.execute("SELECT * FROM favorieten WHERE gebruiker=:gebruiker", gebruiker=vriend)
+        vrienden1 = db.execute("SELECT * FROM verzoeken WHERE van=:van AND geaccepteerd=:geaccepteerd",
+                               van=profiel, geaccepteerd="ja")
 
-    return render_template("vriendinfo.html", favorieten=favorieten, lengte=lengte, tipslengte=tipslengte, totaal=totaal, profiel=profiel, vriend=vriend)
+        aanbevelingen = db.execute("SELECT * FROM aanbevelingen WHERE naar=:naar", naar=profiel)
+        aanbevelingenvan = db.execute("SELECT * FROM aanbevelingen WHERE van=:van", van=profiel)
+
+    return render_template("vriendinfo.html", favorieten=favorieten, lengte=lengte, tipslengte=tipslengte, totaal=totaal,
+                            profiel=profiel, vriend=vriend, checkins=checkins, historie=historie, vrienden=vrienden,
+                            vrienden1=vrienden1, aanbevelingen=aanbevelingen, aanbevelingenvan=aanbevelingenvan)
 
 @app.route("/verwijdervriendredirect", methods=["POST"])
 @login_required
@@ -1120,7 +1134,7 @@ def lijstgemaakt():
             db.execute("INSERT INTO lijsten (gebruiker, lijstnaam, nieuwe_lijst) VALUES (:gebruiker, :lijstnaam, :nieuwe_lijst)",
                     gebruiker=gebruikersnaam, lijstnaam=lijstnaam, nieuwe_lijst="ja")
 
-        return render_template("lijstgemaakt.html", lengte=lengte, tipslengte=tipslengte, lijstnaam=lijstnaam)
+        return render_template("lijstgemaakt.html", lengte=lengte, tipslengte=tipslengte, lijstnaam=lijstnaam, totaal=totaal)
 
 @app.route("/gezamenlijkelijstgemaakt", methods=["POST"])
 @login_required
@@ -1167,7 +1181,7 @@ def gezamenlijkelijstgemaakt():
                 db.execute("INSERT INTO lijsten (gebruiker, lijstnaam, gebruiker2, gez_lijst, nieuwe_lijst) VALUES (:gebruiker, :lijstnaam, :gebruiker2, :gez_lijst, :nieuwe_lijst)",
                             gebruiker=gebruikersnaam, lijstnaam=lijstnaam, gebruiker2=vriend2, gez_lijst="ja", nieuwe_lijst="ja")
 
-        return render_template("gezamenlijkelijstgemaakt.html", lengte=lengte, tipslengte=tipslengte, lijstnaam=lijstnaam)
+        return render_template("gezamenlijkelijstgemaakt.html", lengte=lengte, tipslengte=tipslengte, lijstnaam=lijstnaam, totaal=totaal)
 
 @app.route("/lijst", methods=["POST"])
 @login_required
@@ -1183,7 +1197,7 @@ def lijst():
         lijstinfo = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND lijstnaam=:lijstnaam AND nieuwe_lijst IS NULL",
                                 gebruiker=gebruikersnaam, lijstnaam=lijst)
 
-        return render_template("lijst.html", lengte=lengte, tipslengte=tipslengte, lijst=lijst, lijstinfo=lijstinfo)
+        return render_template("lijst.html", lengte=lengte, tipslengte=tipslengte, lijst=lijst, lijstinfo=lijstinfo, totaal=totaal)
 
 @app.route("/gezlijst", methods=["POST"])
 @login_required
@@ -1197,8 +1211,6 @@ def gezlijst():
 
         lijstnaam = request.form.get("button")
         vriend = request.form.get("vriend")
-        print(lijstnaam)
-        print(vriend)
 
         lijsten1 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam AND nieuwe_lijst IS NULL",
                             gebruiker=gebruikersnaam, gebruiker2=vriend, lijstnaam=lijstnaam)
@@ -1206,7 +1218,7 @@ def gezlijst():
         lijsten2 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam AND nieuwe_lijst IS NULL",
                             gebruiker2=gebruikersnaam, gebruiker=vriend, lijstnaam=lijstnaam)
 
-        return render_template("gezlijst.html", lengte=lengte, tipslengte=tipslengte, lijsten1=lijsten1, lijsten2=lijsten2, lijstnaam=lijstnaam, vriend=vriend)
+        return render_template("gezlijst.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal, lijsten1=lijsten1, lijsten2=lijsten2, lijstnaam=lijstnaam, vriend=vriend)
 
 @app.route("/addcheckins", methods=["POST"])
 @login_required
@@ -1309,9 +1321,8 @@ def addtolist():
             omdb_response = json.loads(str((requests.get(omdb_url).content).decode('UTF-8')))
 
         lijstnaam = lijst.split('|')[0]
-        vriend = lijst.split('|')[1]
 
-        if not vriend:
+        if len(lijst) == len(lijstnaam):
             lijstinfo = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND film_id=:film_id AND titel=:titel AND afbeelding=:afbeelding AND lijstnaam=:lijstnaam AND gez_lijst IS NULL AND nieuwe_lijst IS NULL",
                                     gebruiker=gebruikersnaam, film_id=tmdb_id, titel=tmdb_response["original_title"],
                                     afbeelding=tmdb_response["poster_path"], lijstnaam=lijstnaam)
@@ -1325,10 +1336,11 @@ def addtolist():
                         afbeelding=tmdb_response["poster_path"], lijstnaam=lijstnaam)
 
             return render_template("addtolist.html", tmdb=tmdb_response, omdb=omdb_response, lengte=lengte, tipslengte=tipslengte,
-                                    totaal=totaal, lijstnaam=lijstnaam)
+                                        totaal=totaal, lijstnaam=lijstnaam)
 
         else:
-            lijstinfo = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND film_id=:film_id AND titel=:titel AND afbeelding=:afbeelding AND lijstnaam=:lijstnaam AND gez_lijst IS NOT NULL AND nieuwe_lijst IS NULL AND gebruiker2=:gebruiker2",
+            vriend = lijst.split('|')[1]
+            lijstinfo = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND film_id=:film_id AND titel=:titel AND afbeelding=:afbeelding AND lijstnaam=:lijstnaam AND gez_lijst IS NULL AND nieuwe_lijst IS NULL AND gebruiker2=:gebruiker2",
                                     gebruiker=gebruikersnaam, film_id=tmdb_id, titel=tmdb_response["original_title"],
                                     afbeelding=tmdb_response["poster_path"], lijstnaam=lijstnaam, gebruiker2=vriend)
 
@@ -1339,7 +1351,7 @@ def addtolist():
 
             if not lijstinfo:
 
-                lijstinfo = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND film_id=:film_id AND titel=:titel AND afbeelding=:afbeelding AND lijstnaam=:lijstnaam AND gez_lijst IS NOT NULL AND nieuwe_lijst IS NULL AND gebruiker2=:gebruiker2",
+                lijstinfo = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND film_id=:film_id AND titel=:titel AND afbeelding=:afbeelding AND lijstnaam=:lijstnaam AND gez_lijst IS NULL AND nieuwe_lijst IS NULL AND gebruiker2=:gebruiker2",
                                         gebruiker=vriend, film_id=tmdb_id, titel=tmdb_response["original_title"],
                                         afbeelding=tmdb_response["poster_path"], lijstnaam=lijstnaam, gebruiker2=gebruikersnaam)
 
@@ -1355,8 +1367,41 @@ def addtolist():
                     return render_template("addtolist.html", tmdb=tmdb_response, omdb=omdb_response, lengte=lengte, tipslengte=tipslengte,
                                                 totaal=totaal, lijstnaam=lijstnaam, vriend=vriend)
 
+@app.route("/removelist", methods=["POST"])
+@login_required
+def removelist():
 
+    gebruikersnaam = gebruiker()
+    lengte = lengte_vv()
+    tipslengte=tipslength()
+    totaal = tipslengte + lengte
 
+    if request.method == "POST":
 
+        lijstnaam = request.form.get("lijstnaam")
+        vriend = request.form.get("vriend")
 
+        if not vriend:
+            db.execute("DELETE FROM lijsten WHERE gebruiker=:gebruiker AND lijstnaam=:lijstnaam AND gez_lijst IS NULL",
+                        gebruiker=gebruikersnaam, lijstnaam=lijstnaam)
 
+            return render_template("removelist.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal, lijstnaam=lijstnaam)
+
+        else:
+            check1 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND lijstnaam=:lijstnaam AND gebruiker2=:gebruiker2",
+                                gebruiker=gebruikersnaam, lijstnaam=lijstnaam, gebruiker2=vriend)
+
+            if check1:
+                db.execute("DELETE FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam",
+                            gebruiker=gebruikersnaam, gebruiker2=vriend, lijstnaam=lijstnaam)
+
+                return render_template("removelist.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal, lijstnaam=lijstnaam, vriend=vriend)
+
+            if not check1:
+                check1 = db.execute("SELECT * FROM lijsten WHERE gebruiker=:gebruiker AND lijstnaam=:lijstnaam AND gebruiker2=:gebruiker2",
+                                    gebruiker2=gebruikersnaam, lijstnaam=lijstnaam, gebruiker=vriend)
+
+                db.execute("DELETE FROM lijsten WHERE gebruiker=:gebruiker AND gebruiker2=:gebruiker2 AND lijstnaam=:lijstnaam",
+                            gebruiker2=gebruikersnaam, gebruiker=vriend, lijstnaam=lijstnaam)
+
+                return render_template("removelist.html", lengte=lengte, tipslengte=tipslengte, totaal=totaal, lijstnaam=lijstnaam, vriend=vriend)

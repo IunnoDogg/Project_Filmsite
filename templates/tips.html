@@ -1,38 +1,81 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Mijn tips
+    Tips vrienden
 {% endblock %}
 
 {% block main %}
-<style>
-.favoriet {
-  border: none;
-  background-color: inherit;
-  padding: 14px 28px;
-  font-size: 16px;
-  cursor: pointer;
-  display: inline-block;
-}
-.favoriet:hover {background: #eee;}
-.success {color: green;}
-.info {color: dodgerblue;}
-.warning {color: orange;}
-.danger {color: red;}
-.standaard {color: black;}
-grid {
-  display: grid;
-}
+<style type='text/css'>
+  p {
+    padding: 5px;
+  }
+
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  td, th {
+    border: 1px solid #dddddd;
+    text-align: center;
+    padding: 8px;
+  }
+
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  }
+
+  .standaard {
+    cursor: pointer;
+  }
 </style>
 
-<center><h2>Tips vrienden</h2></center>
-<hr>
+<center><strong><h2>Tips van vrienden</h2></strong></center>
+<br>
+<table>
+  <tr>
+    <th>Tip van vriend</th>
+    <th>Titel film</th>
+    <th>Poster film</th>
+    <th>Tip deze film een vriend</th>
+  </tr>
 
-<div class="grid">
-  <form action="/filminfo" method="post">
-    {% for tip in aanbevelingen %}
-   <p>Getipt door {{tip.van}}</p><button class="favoriet standaard" text-align="center" style="width:300px;" name="tmdb_id" value="{{tip.film_id}}" type="submit"><img src="http://image.tmdb.org/t/p/w45{{tip.afbeelding}}"></img><p>{{tip.titel}}</p></button>
-    {% endfor %}
-  </form>
-</div>
+{% for tip in aanbevelingen %}
+  <tr>
+    <form action="/vriendinfo" method="post">
+      <td><button type="button" class="btn btn-link" name="profiel" value="{{tip.van}}">{{tip.van}}</button></td>
+    </form>
+    <form action="/filminfo" method="post">
+    <td><button type="button" class="btn btn-link" name="tmdb_id" value="tmdb_id">{{tip.titel}}</button></td>
+    </form>
+    <form action="/filminfo" method="post">
+      <td><button class="favoriet standaard" text-align="center" style="width:300px;" name="tmdb_id" value="{{tip.film_id}}" type="submit"><img src="http://image.tmdb.org/t/p/w45{{tip.afbeelding}}"></img></td>
+    </form>
+    <td>
+      <form action="/tipvriend" method="post">
+        <div id="lijstContainer">
+          <center>
+            <label for="action"></label>
+            <select name="tipvriend" id="action">
+              <option disabled selected>Vrienden</option>
+              {% for vriend in vrienden %}
+              {% if a > 0 %}
+              <option value="{{vriend.van}}" name="tipvriend">{{vriend.van}}</option>
+              {% endif %}
+              {% endfor %}
+              {% for vriend in vrienden1 %}
+              {% if b > 0 %}
+              <option value="{{vriend.naar}}" name="tipvriend">{{vriend.naar}}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-outline-primary btn-sm" name="buttonvriend" value="{{tip.film_id}}">Tip</button>
+          </center>
+        </div>
+      </form>
+    </td>
+  </tr>
+{% endfor %}
+</table>
 {% endblock %}

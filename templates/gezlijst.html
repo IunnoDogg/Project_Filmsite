@@ -38,28 +38,11 @@ grid {
 
 </style>
 
-{% if lijsten1 != [] or lijsten2 != [] %}
-{% for lijst in lijsten1 %}
-<center>
-  <h2>
-    Gezamenlijke lijst "{{lijst.lijstnaam}}" met: <button type="submit" class="btn btn-outline-info btn-sm" name="submit" value="{{lijst.gebruiker2}}">{{lijst.gebruiker2}}</button>
-  </h2>
-</center>
-{% endfor %}
-{% for lijst in lijsten2 %}
-<center>
-  <h2>
-    Gezamenlijke lijst "{{lijst.lijstnaam}}" met: <button type="submit" class="btn btn-outline-info btn-sm" name="submit" value="{{lijst.gebruiker}}">{{lijst.gebruiker}}</button>
-  </h2>
-</center>
-{% endfor %}
-{% else %}
 <center>
   <h2>
     Gezamenlijke lijst "{{lijstnaam}}" met: <button type="submit" class="btn btn-outline-info btn-sm" name="submit" value="{{vriend}}">{{vriend}}</button>
   </h2>
 </center>
-{% endif %}
 
 <hr>
 <div class="grid">

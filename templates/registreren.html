@@ -15,7 +15,7 @@
 }
 
 #bericht p {
-  font-size: 11px;
+  font-size: 15px;
 }
 
 /* Add a green text color and a checkmark when the requirements are right */
@@ -42,7 +42,7 @@
 </style>
 
 <form action="{{ url_for('register') }}" method="post">
-    <div class="panel panel-info" style="padding-top:2px">
+    <div class="panel panel-info" style="padding-top:40px">
         <div class="panel-heading">
             <center><div class="panel-title"><h3><strong>Account aanmaken</strong></h3></div>
 
@@ -55,11 +55,6 @@
                         <div class="col-md-5 col-md-offset-3">
                             <div class="form-group">
                                 <input autocomplete="off" autofocus class="form-control" name="gebruikersnaam" id="gebruikersnaam" placeholder="Gebruikersnaam" type="text" required/>
-                            </div>
-                        </div>
-                        <div class="col-md-5 col-md-offset-3">
-                            <div class="form-group">
-                                <input class="form-control" name="email" id="email" placeholder="Email" type="email" required/>
                             </div>
                         </div>
                         <div class="col-md-5 col-md-offset-3">
