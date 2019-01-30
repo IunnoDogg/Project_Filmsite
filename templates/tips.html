@@ -60,14 +60,10 @@
             <select name="tipvriend" id="action">
               <option disabled selected>Vrienden</option>
               {% for vriend in vrienden %}
-              {% if a > 0 %}
               <option value="{{vriend.van}}" name="tipvriend">{{vriend.van}}</option>
-              {% endif %}
               {% endfor %}
               {% for vriend in vrienden1 %}
-              {% if b > 0 %}
               <option value="{{vriend.naar}}" name="tipvriend">{{vriend.naar}}</option>
-              {% endif %}
               {% endfor %}
             </select>
             <button type="submit" class="btn btn-outline-primary btn-sm" name="buttonvriend" value="{{tip.film_id}}">Tip</button>

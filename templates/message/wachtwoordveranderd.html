@@ -7,17 +7,10 @@
 {% block main %}
 <style type='text/css'>
   p {
-    padding: 35px;
+    padding: 15px;
   }
 </style>
 <p>
-  {% if session.user_id %}
-  <center>
-    <h2><strong>Je wachtwoord is gewijzigd!</strong></h2>
-    <hr>
-    <center><h4><strong>Ga terug naar de <a href="/index">homepage</a>!</strong></h4></center>
-  </center>
-  {% else %}
   <center>
     <h2><strong>Je wachtwoord is gewijzigd!</strong></h2>
     <hr>
@@ -25,6 +18,5 @@
       Ga terug naar de <a href="/">homepage</a> of <a href="/login">login</a> !
       </strong></h4></center>
   </center>
-  {% endif %}
 </p>
 {% endblock %}

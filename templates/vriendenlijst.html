@@ -38,7 +38,6 @@
   </tr>
 
 {% for vriend in vrienden %}
-{% if a > 0 %}
   <tr>
     <td>{{vriend.van}}</td>
     <form action="/vriendinfo" method="post">
@@ -49,11 +48,9 @@
       <td><button type="submit" name="verwijder" value="{{vriend.van}}" class="btn btn-outline-danger"><i class="fa fa-trash-o fa-fw"></i> Verwijder {{vriend.van}}</button></td>
     </form>
   </tr>
-{% endif %}
 {% endfor %}
 
 {% for vriend in vrienden1 %}
-{% if b > 0 %}
   <tr>
     <td>{{vriend.naar}}</td>
     <form action="/vriendinfo" method="post">
@@ -64,7 +61,6 @@
       <td><button type="submit" name="verwijder1" value="{{vriend.naar}}" class="btn btn-outline-danger"><i class="fa fa-trash-o fa-fw"></i> Verwijder {{vriend.naar}}</button></td>
     </form>
   </tr>
-{% endif %}
 {% endfor %}
 </table>
 {% endblock %}
